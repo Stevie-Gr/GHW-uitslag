@@ -8030,10 +8030,10 @@ function renderAdminGegevensPane(){
 function renderBVissers(){
   const d=getData();
   const sv=sortVissers(d.vissers);
-  const rows=sv.map(v=>`<tr>
-    <td style="font-weight:600">ÃƒÂ°Ã…Â¸Ã…Â½Ã‚Â£ ${vNaam(v)}</td>
-    <td style="color:var(--muted);font-size:13px">${v.achternaam}</td>
-    <td style="text-align:right"><button class="btn btn-d btn-sm" onclick="delVisser('${v.id}')">ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¢</button></td>
+  const rows=sv.map(v=>`<tr data-visser-id="${escapeHtmlAttr(v.id)}">
+    <td style="font-weight:600">${escapeHtml(vNaam(v))}</td>
+    <td style="color:var(--muted);font-size:13px">${escapeHtml(v.achternaam)}</td>
+    <td style="text-align:right"><div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn btn-gh btn-sm" onclick="editVisser(this.closest('tr'))">Bewerken</button><button class="btn btn-d btn-sm" onclick="delVisser(this.closest('tr').dataset.visserId)">Verwijderen</button></div></td>
   </tr>`).join('')||'<tr><td colspan="3"><div class="empty" style="padding:20px">Nog geen vissers.</div></td></tr>';
   document.getElementById('bv-vissers').innerHTML=`<div class="card" style="margin-bottom:16px">
       <button class="btn btn-gh btn-sm inline-back" style="margin-bottom:14px" onclick="openBeheerView('home')">ÃƒÂ¢Ã¢â‚¬Â Ã‚Â Terug naar beheer</button>
@@ -8050,6 +8050,37 @@ function renderBVissers(){
     <div class="card" style="padding:0;overflow:hidden">
       <table class="tbl"><thead><tr><th>Naam</th><th>Achternaam</th><th></th></tr></thead><tbody>${rows}</tbody></table>
     </div></div>`;
+}
+function editVisser(row){
+  const visser=getData().vissers.find(v=>v.id===row.dataset.visserId);
+  if(!visser) return;
+  row.innerHTML=`<td colspan="3">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+      ${[['voornaam','Voornaam'],['tussenvoegsel','Tussenvoegsel (optioneel)'],['achternaam','Achternaam']].map(([key,label])=>`<label style="flex:1;min-width:140px"><span class="lbl">${label}</span><input data-name="${key}" value="${escapeHtmlAttr(visser[key]||'')}" onkeydown="if(event.key==='Enter'){event.preventDefault();saveVisser(this.closest('tr'));}else if(event.key==='Escape'){renderBVissers();}"></label>`).join('')}
+      <button class="btn btn-g btn-sm" onclick="saveVisser(this.closest('tr'))">Opslaan</button>
+      <button class="btn btn-gh btn-sm" onclick="renderBVissers()">Annuleren</button>
+    </div>
+  </td>`;
+  row.querySelector('input').focus();
+}
+function saveVisser(row){
+  const voornaam=row.querySelector('[data-name="voornaam"]').value.trim();
+  const tussenvoegsel=row.querySelector('[data-name="tussenvoegsel"]').value.trim();
+  const achternaam=row.querySelector('[data-name="achternaam"]').value.trim();
+  if(!voornaam||!achternaam){
+    showAppNotice('Vul minimaal voornaam en achternaam in.','warn');
+    return;
+  }
+  const d=getData();
+  const visser=d.vissers.find(v=>v.id===row.dataset.visserId);
+  if(!visser){
+    showAppNotice('Deze visser bestaat niet meer. Vernieuw de lijst.','warn');
+    return;
+  }
+  Object.assign(visser,{voornaam,tussenvoegsel,achternaam,naam:[voornaam,tussenvoegsel,achternaam].filter(Boolean).join(' ')});
+  saveData(d);
+  renderBVissers();
+  showAppNotice(`Visser "${visser.naam}" bijgewerkt.`);
 }
 function addVisser(){
   const voor=document.getElementById('nv-voor').value.trim();
