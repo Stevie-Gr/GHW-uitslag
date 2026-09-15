@@ -5051,23 +5051,16 @@ function excelBuildWorkbook(sheetName){
 
 async function excelInjectHeader(worksheet, columnCount, title, metaLines, logoSrc=''){
   excelApplyBaseSheetStyle(worksheet, columnCount, 8);
-  worksheet.getRow(1).height=17;
-  worksheet.getRow(2).height=28;
-  worksheet.getRow(3).height=20;
-  worksheet.getRow(4).height=18;
-  worksheet.getRow(5).height=18;
-  worksheet.getRow(6).height=14;
+  worksheet.getRow(1).height=logoSrc?90:12;
+  worksheet.getRow(2).height=22;
+  worksheet.getRow(3).height=32;
+  worksheet.getRow(4).height=20;
+  worksheet.getRow(5).height=20;
+  worksheet.getRow(6).height=20;
   worksheet.getRow(7).height=12;
 
-  worksheet.getColumn(1).width=Math.max(worksheet.getColumn(1).width||0,10);
-  if(columnCount>=2) worksheet.getColumn(2).width=Math.max(worksheet.getColumn(2).width||0,15);
-  if(columnCount>=3) worksheet.getColumn(3).width=Math.max(worksheet.getColumn(3).width||0,40);
-
-  if(columnCount>=2){
-    worksheet.mergeCells(1,1,5,2);
-    excelSetRangeFill(worksheet,1,5,1,2,{ type:'pattern', pattern:'solid', fgColor:{ argb:'FF0B1319' } });
-  }
-  const textStartCol=columnCount>=3 ? 3 : 1;
+  // The header spans the sheet so its logo never widens the place or peg columns.
+  const textStartCol=1;
   worksheet.mergeCells(1,textStartCol,1,columnCount);
   worksheet.mergeCells(2,textStartCol,2,columnCount);
   worksheet.mergeCells(3,textStartCol,3,columnCount);
@@ -5075,26 +5068,30 @@ async function excelInjectHeader(worksheet, columnCount, title, metaLines, logoS
   worksheet.mergeCells(5,textStartCol,5,columnCount);
   worksheet.mergeCells(6,textStartCol,6,columnCount);
 
-  const kickerCell=worksheet.getCell(1,textStartCol);
+  if(logoSrc) excelSetRangeFill(worksheet,1,1,1,columnCount,{ type:'pattern', pattern:'solid', fgColor:{ argb:'FFFFFFFF' } });
+  const kickerCell=worksheet.getCell(2,textStartCol);
   kickerCell.value='Hengelsportvereniging Groot Hoeksche Waard';
   excelSetCellStyle(kickerCell,{
     font:{ name:'Arial', size:10, bold:true, color:{ argb:'FF6EC4A8' } },
     alignment:{ vertical:'middle' }
   });
 
-  const titleCell=worksheet.getCell(2,textStartCol);
+  const titleCell=worksheet.getCell(3,textStartCol);
   titleCell.value=excelText(title);
+  const headerChars=Math.max(20,Array.from({length:columnCount-textStartCol+1},(_,index)=>worksheet.getColumn(textStartCol+index).width||10).reduce((a,b)=>a+b,0)/2.5);
+  worksheet.getRow(3).height=Math.max(32,Math.ceil(titleCell.value.length/headerChars)*28);
   excelSetCellStyle(titleCell,{
     font:{ name:'Arial', size:22, bold:true, color:{ argb:'FFF4F0E8' } },
     alignment:{ vertical:'middle', wrapText:true }
   });
 
-  excelApplyMetaText(worksheet.getCell(3,textStartCol),'FF9BB5C6',false);
-  worksheet.getCell(3,textStartCol).value=excelText(metaLines[0]||'');
-  excelApplyMetaText(worksheet.getCell(4,textStartCol));
-  worksheet.getCell(4,textStartCol).value=excelText(metaLines[1]||'');
-  excelApplyMetaText(worksheet.getCell(5,textStartCol),'FF7DE0C0',true);
-  worksheet.getCell(5,textStartCol).value=excelText(metaLines[2]||'');
+  metaLines.slice(0,3).forEach((text,index)=>{
+    const cell=worksheet.getCell(4+index,textStartCol);
+    excelApplyMetaText(cell,index===2?'FF7DE0C0':'FF9BB5C6',index===2);
+    cell.value=excelText(text||'');
+    cell.alignment={ ...cell.alignment, wrapText:true };
+    worksheet.getRow(4+index).height=Math.max(20,Math.ceil(cell.value.length/(headerChars*2))*16);
+  });
 
   for(let col=1; col<=columnCount; col++){
     worksheet.getCell(7,col).border={ bottom:{ style:'medium', color:{ argb:'334A5A66' } } };
@@ -5102,13 +5099,16 @@ async function excelInjectHeader(worksheet, columnCount, title, metaLines, logoS
 
   if(logoSrc){
     try{
+      const logo=await loadImageElement(logoSrc);
+      const sheetWidth=Array.from({length:columnCount},(_,index)=>(worksheet.getColumn(index+1).width||10)*7+5).reduce((a,b)=>a+b,0);
+      const logoScale=Math.min(280/logo.naturalWidth,100/logo.naturalHeight,(sheetWidth-24)/logo.naturalWidth);
       const imageId=worksheet.workbook.addImage({
         base64:logoSrc,
         extension:getExcelImageExtension(logoSrc)
       });
       worksheet.addImage(imageId,{
-        tl:{ col:0.18, row:0.34 },
-        ext:{ width:148, height:60 },
+        tl:{ nativeCol:0, nativeColOff:12*9525, nativeRow:0, nativeRowOff:10*9525 },
+        ext:{ width:logo.naturalWidth*logoScale, height:logo.naturalHeight*logoScale },
         editAs:'oneCell'
       });
     }catch(_err){
@@ -6106,7 +6106,7 @@ async function downloadUitslagExcel(){
     return;
   }
   const hasPairs=model.sections.some(section=>section.kind==='pairs');
-  const widths=hasPairs ? [8,10,38,16,16] : [8,10,36,16];
+  const widths=hasPairs ? [8,6,40,16,16] : [8,6,40,16];
   const { workbook, worksheet }=excelBuildWorkbook('Uitslag');
   excelSetColumns(worksheet,widths);
   await excelInjectHeader(worksheet,widths.length,model.title,[
@@ -6196,6 +6196,19 @@ async function downloadUitslagExcel(){
   await downloadWorkbookXlsx(workbook,`uitslag_${getShareSafeName(model.title||'wedstrijd','wedstrijd')}.xlsx`);
 }
 
+function getUitslagCanvasHeaderLayout(ctx, model){
+  const textWidth=1400-96-(model.logoSrc?254:0);
+  ctx.font='800 50px Arial';
+  const titleLines=wrapCanvasText(ctx,model.title,textWidth);
+  ctx.font='500 22px Arial';
+  const metaLines=[
+    [model.competition,model.typeLabel].filter(Boolean).join(' · '),
+    model.dateLabel,model.placeLabel,model.totalLabel
+  ].filter(Boolean).flatMap(text=>wrapCanvasText(ctx,text,textWidth));
+  const metaOffset=38+titleLines.length*54+16;
+  return { titleLines,metaLines,metaOffset,height:Math.max(118,metaOffset+metaLines.length*28)+24 };
+}
+
 function measureUitslagImageHeight(model){
   const canvas=document.createElement('canvas');
   const ctx=canvas.getContext('2d');
@@ -6203,9 +6216,9 @@ function measureUitslagImageHeight(model){
   const padding=48;
   const innerWidth=width-(padding*2);
   let y=padding;
-  y+=220;
+  y+=getUitslagCanvasHeaderLayout(ctx,model).height;
   model.sections.forEach(section=>{
-    y+=72;
+    y+=18+88;
     if(section.kind==='pairs'){
       section.rows.forEach(row=>{
         ctx.font='800 28px Arial';
@@ -6225,10 +6238,9 @@ function measureUitslagImageHeight(model){
         const textWidth=innerWidth-90-110-200-40;
         const lines=wrapCanvasText(ctx, row.naam, textWidth);
         const rowHeight=Math.max(58, lines.length*32 + 18);
-        y+=rowHeight;
+        y+=rowHeight+12;
       });
     }
-    y+=18;
   });
   return Math.ceil(y + padding);
 }
@@ -6310,7 +6322,9 @@ async function downloadUitslagImageCanvasExport(){
     const logoH=logo?118:0;
     if(logo){
       roundedRect(ctx,padding,y,logoW,logoH,22,'#ffffff');
-      ctx.drawImage(logo,padding+14,y+12,logoW-28,logoH-24);
+      const ratio=Math.min((logoW-28)/logo.naturalWidth,(logoH-24)/logo.naturalHeight);
+      const drawW=logo.naturalWidth*ratio, drawH=logo.naturalHeight*ratio;
+      ctx.drawImage(logo,padding+(logoW-drawW)/2,y+(logoH-drawH)/2,drawW,drawH);
     }
     const titleX=logo?padding+logoW+24:padding;
     const titleW=innerWidth-(logo?logoW+24:0);
@@ -6319,18 +6333,19 @@ async function downloadUitslagImageCanvasExport(){
     ctx.fillText('Hengelsportvereniging Groot Hoeksche Waard',titleX,y+8);
     ctx.fillStyle='#f4f0e8';
     ctx.font='800 50px Arial';
-    wrapCanvasText(ctx, model.title, titleW).slice(0,2).forEach((line,idx)=>{
+    const header=getUitslagCanvasHeaderLayout(ctx,model);
+    ctx.font='800 50px Arial';
+    header.titleLines.forEach((line,idx)=>{
       ctx.fillText(line,titleX,y+38+(idx*54));
     });
     ctx.fillStyle='#9bb5c6';
     ctx.font='500 22px Arial';
-    const metaItems=[model.competition,model.dateLabel,model.placeLabel,model.totalLabel,model.typeLabel].filter(Boolean);
-    let metaY=y+150;
-    metaItems.forEach((item,idx)=>{
+    let metaY=y+header.metaOffset;
+    header.metaLines.forEach(item=>{
       ctx.fillText(item,titleX,metaY);
       metaY += 28;
     });
-    y += Math.max(logoH,210);
+    y += header.height;
 
     model.sections.forEach(section=>{
       y += 18;
