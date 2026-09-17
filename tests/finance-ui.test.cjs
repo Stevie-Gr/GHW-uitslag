@@ -1,9 +1,9 @@
 let playwright;try{playwright=require('playwright');}catch(_){playwright=require('C:/Users/grootest/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');}
-const {chromium}=playwright;const ExcelJS=require('../exceljs.min.js'),fs=require('fs'),path=require('path'),os=require('os'),assert=require('node:assert/strict'),{pathToFileURL}=require('url');
+const {chromium}=playwright;const ExcelJS=require('../lib/exceljs.min.js'),fs=require('fs'),path=require('path'),os=require('os'),assert=require('node:assert/strict'),{pathToFileURL}=require('url');
 const out=path.join(os.tmpdir(),'hsv-finance-test');fs.mkdirSync(out,{recursive:true});
 (async()=>{
  // Fixture: a couple match with results, a series with two matches, an expense; uploaded via the year plan.
- const wb=await require('../finance-plan.js').workbook(ExcelJS,{roosterItems:[],wedstrijden:[]},2026),ws=wb.getWorksheet('Jaarplanning');for(let n=8;n<=80;n++)ws.getRow(n).values=[];
+ const wb=await require('../lib/finance-plan.js').workbook(ExcelJS,{roosterItems:[],wedstrijden:[]},2026),ws=wb.getWorksheet('Jaarplanning');for(let n=8;n<=80;n++)ws.getRow(n).values=[];
  ws.getRow(8).values=['Koppel','Spui koppel 1','','28-03-2026',null,'Spui','Oud-Beijerland','07:30','08:00','12:00','Vrij',30,10];ws.getRow(9).values=['Overige uitgave','Nieuwe weegschaal',null,'01-10-2026',null,null,null,null,null,null,null,200];
  const fixture=path.join(out,'planning.xlsx');fs.writeFileSync(fixture,Buffer.from(await wb.xlsx.writeBuffer()));
  const browser=await chromium.launch({channel:'msedge',headless:true});

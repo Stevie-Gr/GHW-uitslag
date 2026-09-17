@@ -1,5 +1,5 @@
 let playwright;try{playwright=require('playwright');}catch(_){playwright=require('C:/Users/grootest/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');}
-const {chromium}=playwright;const ExcelJS=require('../exceljs.min.js'),fs=require('fs'),path=require('path'),os=require('os'),assert=require('node:assert/strict'),{pathToFileURL}=require('url');
+const {chromium}=playwright;const ExcelJS=require('../lib/exceljs.min.js'),fs=require('fs'),path=require('path'),os=require('os'),assert=require('node:assert/strict'),{pathToFileURL}=require('url');
 const out=path.join(os.tmpdir(),'hsv-finance-plan-test');fs.mkdirSync(out,{recursive:true});
 const row=(form,name,serie,date,water,loc,g,s,e,b,f,sf,aow,laow)=>[form,name,serie,date,null,water,loc,g,s,e,null,b,f,sf,aow,laow];
 const clear=(ws,from=8,to=80)=>{for(let n=from;n<=to;n++)ws.getRow(n).values=[];};

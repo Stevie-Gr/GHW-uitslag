@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),ExcelJS=require('../exceljs.min.js'),P=require('../finance-plan.js'),C=require('../finance-series.js'),W=require('../finance-waters.js');require('../finance-begroting-2026.js');
+const assert=require('node:assert/strict'),ExcelJS=require('../lib/exceljs.min.js'),P=require('../lib/finance-plan.js'),C=require('../lib/finance-series.js'),W=require('../lib/finance-waters.js');require('../lib/finance-begroting-2026.js');
 const empty=()=>({roosterItems:[],wedstrijden:[],competities:[],uitslagen:[]});
 const row=(form,name,serie,date,water,loc,g,s,e,b,f,sf,aow,laow)=>[form,name,serie,date,null,water,loc,g,s,e,null,b,f,sf,aow,laow];
 const clear=(ws,from=8,to=60)=>{for(let n=from;n<=to;n++)ws.getRow(n).values=[];};

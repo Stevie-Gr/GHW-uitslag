@@ -1,8 +1,8 @@
 let playwright;try{playwright=require('playwright');}catch(_){playwright=require('C:/Users/grootest/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');}
-const {chromium}=playwright;const ExcelJS=require('../exceljs.min.js'),fs=require('fs'),path=require('path'),os=require('os'),assert=require('node:assert/strict'),{pathToFileURL}=require('url');
+const {chromium}=playwright;const ExcelJS=require('../lib/exceljs.min.js'),fs=require('fs'),path=require('path'),os=require('os'),assert=require('node:assert/strict'),{pathToFileURL}=require('url');
 const out=path.join(os.tmpdir(),'hsv-finance-test');fs.mkdirSync(out,{recursive:true});
 (async()=>{
- const wb=await require('../finance-plan.js').workbook(ExcelJS,{roosterItems:[],wedstrijden:[]},2026),ws=wb.getWorksheet('Jaarplanning');for(let n=8;n<=80;n++)ws.getRow(n).values=[];
+ const wb=await require('../lib/finance-plan.js').workbook(ExcelJS,{roosterItems:[],wedstrijden:[]},2026),ws=wb.getWorksheet('Jaarplanning');for(let n=8;n<=80;n++)ws.getRow(n).values=[];
  for(let n=1;n<=3;n++)ws.getRow(7+n).values=['Serie','','Winterserie','0'+n+'-02-2026',null,'Kreek Dokters','Boezem & Co.','07:30','08:00','12:00','Vaste stok',n===1?40:null,n===1?3.5:null,n===1?10.5:null,n===1?9:null,n===1?3:null];
  const fixture=path.join(out,'series.xlsx');fs.writeFileSync(fixture,Buffer.from(await wb.xlsx.writeBuffer()));
  const browser=await chromium.launch({channel:'msedge',headless:true});
