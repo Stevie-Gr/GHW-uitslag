@@ -81,10 +81,10 @@ Online publiceren, gedeelde opslag en een koppeling met MijnHSV zijn uitgesteld.
 
 ## Controle voor ontwikkelaars
 
-- `node finance-core.test.cjs`: schoon beginnen, betaald-tenzij, koppeleenheden, alleen-visser, serie kiezen/bevestigen, AOW-tarieven, los→serie, samenvatting begroot/werkelijk/over.
-- `node finance-plan.test.cjs` en `node finance-plan-ui.test.cjs`: jaarplanning met twee bladen, weinig verplichte velden, seriebedragen op een willekeurige regel, automatische namen, viswater-standaardwaarden, budgetcellen, begrotingshints 2026, herkenning op datum/vorm/water, alle fouten tegelijk, oude kolomnamen, voorstel voor een volgend jaar.
-- `node finance-ui.test.cjs` en `node finance-series-ui.test.cjs`: geïsoleerde Edge-tests (Playwright, eerst via npm, anders de lokaal gebundelde runtime) van startkaart, upload, kopregel, invoerpaneel, openstaand, werkelijk-bedrag, AOW-vinkje, migratie en series.
-- `node finance-duplicates.test.cjs` en `node finance-duplicates-ui.test.cjs`: dubbele wedstrijden.
+- `node tests/finance-core.test.cjs`: schoon beginnen, betaald-tenzij, koppeleenheden, alleen-visser, serie kiezen/bevestigen, AOW-tarieven, los→serie, samenvatting begroot/werkelijk/over.
+- `node tests/finance-plan.test.cjs` en `node tests/finance-plan-ui.test.cjs`: jaarplanning met twee bladen, weinig verplichte velden, seriebedragen op een willekeurige regel, automatische namen, viswater-standaardwaarden, budgetcellen, begrotingshints 2026, herkenning op datum/vorm/water, alle fouten tegelijk, oude kolomnamen, voorstel voor een volgend jaar.
+- `node tests/finance-ui.test.cjs` en `node tests/finance-series-ui.test.cjs`: geïsoleerde Edge-tests (Playwright, eerst via npm, anders de lokaal gebundelde runtime) van startkaart, upload, kopregel, invoerpaneel, openstaand, werkelijk-bedrag, AOW-vinkje, migratie en series.
+- `node tests/finance-duplicates.test.cjs` en `node tests/finance-duplicates-ui.test.cjs`: dubbele wedstrijden.
 
 ## Mogelijk dubbele wedstrijden controleren
 
@@ -92,4 +92,4 @@ Kies in Financiën **Dubbele wedstrijden controleren**. De app toont ongekoppeld
 
 Na koppelen bevat de volgende jaarplanning één regel voor dat paar. Uitslagen, betalingen en bijlagen blijven behouden; de oorspronkelijke records blijven voor herstel in de volledige back-up beschikbaar. Download na de controle een nieuwe jaarplanning. Een eerder gedownload bestand kan nog oude koppelingen bevatten.
 
-Controles: `node finance-duplicates.test.cjs` en `node finance-duplicates-ui.test.cjs`.
+Controles: `node tests/finance-duplicates.test.cjs` en `node tests/finance-duplicates-ui.test.cjs`.

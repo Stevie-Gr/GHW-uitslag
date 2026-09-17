@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),C=require('./finance-series.js');
+const assert=require('node:assert/strict'),C=require('../finance-series.js');
 // Everyone in a result has paid unless marked; couples pay per couple; series members choose once and confirm once.
 const d={vissers:[{id:'a',naam:'A'},{id:'b',naam:'B'},{id:'c',naam:'C',aow:true},{id:'e',naam:'E'}],competities:[{id:'s1',naam:'Winter',type:'serie'}],
  wedstrijden:[{id:'k1',naam:'Koppel Spui',datum:'2026-03-28',isKoppel:true},{id:'w1',naam:'Winter 1',datum:'2026-01-17',competitieId:'s1'},{id:'w2',naam:'Winter 2',datum:'2026-02-07',competitieId:'s1'}],

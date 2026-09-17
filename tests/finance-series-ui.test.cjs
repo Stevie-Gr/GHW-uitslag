@@ -1,12 +1,12 @@
 let playwright;try{playwright=require('playwright');}catch(_){playwright=require('C:/Users/grootest/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');}
-const {chromium}=playwright;const ExcelJS=require('./exceljs.min.js'),fs=require('fs'),path=require('path'),os=require('os'),assert=require('node:assert/strict'),{pathToFileURL}=require('url');
+const {chromium}=playwright;const ExcelJS=require('../exceljs.min.js'),fs=require('fs'),path=require('path'),os=require('os'),assert=require('node:assert/strict'),{pathToFileURL}=require('url');
 const out=path.join(os.tmpdir(),'hsv-finance-test');fs.mkdirSync(out,{recursive:true});
 (async()=>{
- const wb=await require('./finance-plan.js').workbook(ExcelJS,{roosterItems:[],wedstrijden:[]},2026),ws=wb.getWorksheet('Jaarplanning');for(let n=8;n<=80;n++)ws.getRow(n).values=[];
+ const wb=await require('../finance-plan.js').workbook(ExcelJS,{roosterItems:[],wedstrijden:[]},2026),ws=wb.getWorksheet('Jaarplanning');for(let n=8;n<=80;n++)ws.getRow(n).values=[];
  for(let n=1;n<=3;n++)ws.getRow(7+n).values=['Serie','','Winterserie','0'+n+'-02-2026',null,'Kreek Dokters','Boezem & Co.','07:30','08:00','12:00','Vaste stok',n===1?40:null,n===1?3.5:null,n===1?10.5:null,n===1?9:null,n===1?3:null];
  const fixture=path.join(out,'series.xlsx');fs.writeFileSync(fixture,Buffer.from(await wb.xlsx.writeBuffer()));
  const browser=await chromium.launch({channel:'msedge',headless:true});
- try{const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.route('https://**',r=>r.abort());await page.goto(pathToFileURL(path.join(process.cwd(),'index.html')).href);
+ try{const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());await page.route('https://**',r=>r.abort());await page.goto(pathToFileURL(path.join(__dirname,'..','index.html')).href);
  await page.locator('#admin-entry-btn').click();await page.locator('#pin-admin-select').selectOption('head-admin');await page.locator('#pin-inp').fill('1234');await page.getByRole('button',{name:'Inloggen',exact:true}).click();await page.locator('#nav-finance').click();await page.locator('#fin-year').fill('2026');await page.locator('#fin-year').dispatchEvent('change');const click=a=>page.locator('#pv-finance [data-fin="'+a+'"]').first().click();
  await click('import');await page.locator('#fin-import-file').setInputFiles(fixture);await page.getByText('Controleer de verschillen').waitFor();await click('apply-import');
  // One series line in the overview, four tariffs stored.
