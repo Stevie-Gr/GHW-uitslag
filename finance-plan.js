@@ -5,12 +5,12 @@ const C=typeof module!=='undefined'&&module.exports?require('./finance-series.js
 const W=typeof module!=='undefined'&&module.exports?require('./finance-waters.js'):root.FinanceWaters;
 const clone=x=>JSON.parse(JSON.stringify(x)), norm=x=>String(x??'').trim().toLocaleLowerCase('nl'), blank=x=>x===null||x===undefined||x==='';
 const nameKey=s=>norm(s).replace(/[^a-z0-9]+/g,' ').trim();
-const headers=['Vorm','Wedstrijdnaam / omschrijving','Serie','Datum','Einddatum','Viswater','Locatie loting','Lotingtijd','Starttijd','Eindtijd','Hengeltype','Begroot','Inleg','Inleg hele serie','Inleg hele serie AOW','_Koppeling'];
-const keys=['form','title','series','date','endDate','water','location','gather','start','end','rod','planned','fee','seriesFee','seriesFeeAow','id'];
-const aliases={'Wedstrijdvorm':'form','Inleg per wedstrijd':'fee','Soort':'soort'};
+const headers=['Vorm','Wedstrijdnaam / omschrijving','Serie','Datum','Einddatum','Viswater','Locatie loting','Lotingtijd','Starttijd','Eindtijd','Hengeltype','Begroot','Inleg los / per wedstrijd','Inleg hele serie','Inleg hele serie AOW','Inleg los AOW','Uitbetaald / uitgegeven','_Koppeling'];
+const keys=['form','title','series','date','endDate','water','location','gather','start','end','rod','planned','fee','seriesFee','seriesFeeAow','looseFeeAow','actual','id'];
+const aliases={'Wedstrijdvorm':'form','Inleg per wedstrijd':'fee','Inleg':'fee','Soort':'soort'};
 const forms={solo:'Individueel',koppel:'Koppel',gescheiden_koppel:'Gescheiden koppel',serie:'Serie',expense:'Overige uitgave'};
-const compareKeys=['title','date','endDate','form','series','rod','water','location','gather','start','end','planned','fee','seriesFee','seriesFeeAow'];
-const amountKeys=['planned','fee','seriesFee','seriesFeeAow'];
+const compareKeys=['title','date','endDate','form','series','rod','water','location','gather','start','end','planned','fee','feeBasis','seriesFee','seriesFeeAow','looseFeeAow','actual'];
+const amountKeys=['planned','fee','seriesFee','seriesFeeAow','looseFeeAow','actual'];
 const yearOf=e=>String(e.date||e.year||'').slice(0,4);
 const autoTitle=(series,n)=>series+' - wedstrijd '+n;
 const derivedTitle=r=>r.form==='serie'?(r.water?r.series+' · '+r.water:''):(r.water?forms[r.form]+' '+r.water:'');
@@ -21,13 +21,11 @@ function resolveDuplicate(d,year,key,choice){const next=clone(d);C.sync(next);co
  const f=next.finance,a=f.entries.find(e=>e.id===pair.agendaId),b=f.entries.find(e=>e.id===pair.resultId),r=next.roosterItems.find(r=>r.id===a.agendaId),w=next.wedstrijden.find(w=>w.id===b.matchId),form=matchForm(next,w);
  if(a.seriesId!==b.seriesId&&(a.seriesId||b.seriesId))throw Error('Deze regels horen niet bij dezelfde serie. Controleer eerst de serie-indeling in de app.');
  if(a.configured&&b.configured&&(a.planned!==b.planned||a.fee!==b.fee))throw Error('Beide posten hebben verschillende financiële bedragen. Maak deze eerst gelijk in Financiën voordat je koppelt.');
- if((a.payout||a.status==='settled')&&(b.payout||b.status==='settled'))throw Error('Beide posten hebben een afrekening. Controleer deze eerst in Financiën.');
- for(const id of Object.keys(a.payments||{}))if(Object.hasOwn(b.payments||{},id))throw Error('Dezelfde visser heeft op beide posten een betaling. Controleer die eerst in Financiën.');
  if(choice==='agenda'&&r.wedstrijdVorm!==form)throw Error('De wedstrijdvorm verschilt van de bestaande uitslag. Kies de uitslag als basis om de deelnemersindeling te behouden.');
  // Store both original records for recovery; never discard receipts or results.
  f.linkHistory=f.linkHistory||[];f.linkHistory.push({date:new Date().toISOString(),agenda:clone(a),result:clone(b),roster:clone(r),match:clone(w)});
  if(!a.configured&&b.configured){a.planned=b.planned;a.fee=b.fee;a.configured=true;}
- a.payments={...a.payments,...b.payments};a.members=[...new Set([...a.members,...b.members])];a.attachments=[...a.attachments,...b.attachments];a.note=[a.note,b.note].filter(Boolean).join('\n');if(b.status==='settled'||b.payout){a.status=b.status;a.payout=b.payout;}
+ a.unpaid={...a.unpaid,...b.unpaid};a.members=[...new Set([...a.members,...b.members])];if(a.actual===null&&b.actual!==null)a.actual=b.actual;
  a.matchId=b.matchId;r.gekoppeldeWedstrijdId=b.matchId;r.wedstrijdVorm=form;
  if(choice==='result'){r.titel=w.naam;for(const [rk,wk] of [['water','water'],['locatie','locatie'],['verzamelen','verzamelen'],['starttijd','starttijd'],['eindtijd','eindtijd'],['hengeltype','hengeltype'],['einddatum','einddatum']])if(w[wk])r[rk]=w[wk];}
  else if(!w.gescheidenGroepId)w.naam=r.titel;
@@ -38,9 +36,9 @@ function rows(d,year){
  d=clone(d);C.sync(d);
  const entries=d.finance.entries.filter(e=>e.kind!=='series'&&yearOf(e)===String(year)&&e.status!=='cancelled');
  const result=entries.map(e=>{const a=(d.roosterItems||[]).find(a=>a.id===e.agendaId)||{},w=(d.wedstrijden||[]).find(w=>w.id===e.matchId)||{},p=C.seriesFor(d,e);
- return {id:e.id,kind:e.kind,title:e.title||'',autoTitle:!!a.autoTitel,date:e.date||'',endDate:a.einddatum||'',form:e.kind==='expense'?'expense':p?'serie':a.wedstrijdVorm||matchForm(d,w),series:p?.title||'',rod:a.hengeltype||'',water:a.water||w.water||'',location:a.locatie||w.locatie||'',gather:a.verzamelen||'',start:a.starttijd||'',end:a.eindtijd||'',planned:e.configured?e.planned:null,fee:e.kind==='match'&&!p&&e.configured?e.fee:null,seriesFee:null,seriesFeeAow:null,year:Number(year)};});
+ return {id:e.id,kind:e.kind,title:e.title||'',autoTitle:!!a.autoTitel,date:e.date||'',endDate:a.einddatum||'',form:e.kind==='expense'?'expense':p?'serie':a.wedstrijdVorm||matchForm(d,w),series:p?.title||'',rod:a.hengeltype||'',water:a.water||w.water||'',location:a.locatie||w.locatie||'',gather:a.verzamelen||'',start:a.starttijd||'',end:a.eindtijd||'',planned:e.configured?e.planned:null,fee:e.kind==='match'&&!p&&e.configured?e.fee:null,feeBasis:e.kind==='match'&&!p?(e.feeBasis||'person'):'',seriesFee:null,seriesFeeAow:null,looseFeeAow:null,actual:e.configured&&!p?e.actual:null,year:Number(year)};});
  result.sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')||a.title.localeCompare(b.title));
- const seen=new Set();for(const r of result){if(r.form!=='serie'||r.kind!=='match')continue;const e=d.finance.entries.find(e=>e.id===r.id),p=C.seriesFor(d,e);r.planned=r.fee=null;if(!seen.has(p.id)){seen.add(p.id);r.planned=p.configured?p.planned:null;r.fee=p.configured?p.looseFee:null;r.seriesFee=p.configured?p.fee:null;r.seriesFeeAow=p.configured?(p.feeAow||0):null;}}
+ const seen=new Set();for(const r of result){if(r.form!=='serie'||r.kind!=='match')continue;const e=d.finance.entries.find(e=>e.id===r.id),p=C.seriesFor(d,e);r.planned=r.fee=null;if(!seen.has(p.id)){seen.add(p.id);r.planned=p.configured?p.planned:null;r.fee=p.configured?p.looseFee:null;r.seriesFee=p.configured?p.fee:null;r.seriesFeeAow=p.configured?(p.feeAow||0):null;r.looseFeeAow=p.configured?(p.looseFeeAow||0):null;r.actual=p.configured?p.actual:null;}}
  return result;
 }
 /* Rows for the download: current plan, or a proposal copied from the previous year, plus club budget hints. */
@@ -56,7 +54,7 @@ function sheetRows(d,year){
   const pool=data.filter(r=>free(r)&&r.form!=='serie'&&(h.form==='expense'?r.kind==='expense':r.kind==='match'));return pool.find(r=>nameKey(r.title)===k)||pool.find(r=>similar(nameKey(r.title),k));};
  const extra=[];
  for(const h of list){const r=candidates(h);if(r){used.add(r);if(r.planned===null){r.planned=h.planned;r.hinted=true;}continue;}
-  extra.push({id:'',kind:h.form==='expense'?'expense':'match',title:h.form==='serie'||(h.water&&h.form)?'':h.title,series:h.form==='serie'?h.title:'',form:h.form||'',date:'',endDate:'',rod:'',water:h.water||'',location:'',gather:'',start:'',end:'',planned:h.planned,fee:null,seriesFee:null,seriesFeeAow:null,year:Number(year),hinted:true});}
+  extra.push({id:'',kind:h.form==='expense'?'expense':'match',title:h.form==='serie'||(h.water&&h.form)?'':h.title,series:h.form==='serie'?h.title:'',form:h.form||'',date:'',endDate:'',rod:'',water:h.water||'',location:'',gather:'',start:'',end:'',planned:h.planned,fee:null,feeBasis:'',seriesFee:null,seriesFeeAow:null,looseFeeAow:null,actual:null,year:Number(year),hinted:true});}
  return {rows:[...data,...extra],proposal,hintBudget:list.budget||null};
 }
 function time(v){if(v instanceof Date)v=v.toISOString().slice(11,16);else if(typeof v==='number'){const m=Math.round((v%1)*1440);v=String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}const s=String(v??'').trim();if(!/^([01]?\d|2[0-3])[:.][0-5]\d$/.test(s))throw Error('Gebruik een tijd zoals 08:30.');return s.replace('.',':').padStart(5,'0');}
@@ -85,18 +83,20 @@ function read(wb){
   let form=Object.keys(forms).find(k=>norm(forms[k])===norm(raw.form))||'';if(norm(raw.soort)==='overige uitgave')form='expense';
   if(!form){if(blank(raw.form)){warnings.push('Rij '+n+' ('+String(raw.title||raw.series||'zonder naam').trim()+') is overgeslagen: kies eerst een vorm.');return;}fail(n,'Vorm','Kies Individueel, Koppel, Gescheiden koppel, Serie of Overige uitgave.');return;}
   const kind=form==='expense'?'expense':'match';
-  const r={id:String(raw.id||'').trim(),kind,form,title:String(raw.title??'').trim(),series:String(raw.series??'').trim(),date:'',endDate:'',water:String(raw.water??'').trim(),location:String(raw.location??'').trim(),gather:'',start:'',end:'',rod:'',planned:null,fee:null,seriesFee:null,seriesFeeAow:null,year,line:n,autoTitle:false};
+  const r={id:String(raw.id||'').trim(),kind,form,title:String(raw.title??'').trim(),series:String(raw.series??'').trim(),date:'',endDate:'',water:String(raw.water??'').trim(),location:String(raw.location??'').trim(),gather:'',start:'',end:'',rod:'',planned:null,fee:null,feeBasis:'',seriesFee:null,seriesFeeAow:null,looseFeeAow:null,actual:null,actualPresent:!!cols.actual,year,line:n,autoTitle:false};
   for(const [k,col] of [['date','Datum'],['endDate','Einddatum']]){if(blank(raw[k]))continue;try{r[k]=date(raw[k]);}catch(e){fail(n,col,e.message);}}
   for(const k of ['gather','start','end']){if(blank(raw[k]))continue;try{r[k]=time(raw[k]);}catch(e){fail(n,label(k),e.message);}}
+  if(!blank(raw.fee)&&/\bp\.?p\.?\s*$/i.test(String(raw.fee))){raw.fee=String(raw.fee).replace(/\bp\.?p\.?\s*$/i,'').trim();r.feeBasis='person';}
   for(const k of amountKeys){if(blank(raw[k]))continue;try{r[k]=C.cents(raw[k]);}catch(e){fail(n,label(k),e.message);}}
+  if(kind==='match'&&form!=='serie'&&!r.feeBasis)r.feeBasis=['koppel','gescheiden_koppel'].includes(form)?'koppel':'person';
   if(!blank(raw.rod)){const rod=norm(raw.rod);if(!['vaste stok','vrij'].includes(rod))fail(n,'Hengeltype','Kies Vaste stok of Vrij, of laat leeg.');else r.rod=rod==='vrij'?'Vrij':'Vaste stok';}
   if(r.date&&yearOf(r)!==String(year))fail(n,'Datum','Datum valt buiten het jaar bovenaan ('+year+').');
-  if(kind==='expense'){if(!r.title)fail(n,label('title'),'Omschrijving ontbreekt.');if(['series','endDate','water','location','gather','start','end','rod'].some(k=>!blank(raw[k]))||r.fee!==null||r.seriesFee!==null||r.seriesFeeAow!==null)fail(n,'Vorm','Vul bij een overige uitgave alleen omschrijving, eventuele datum en Begroot in.');}
+  if(kind==='expense'){if(!r.title)fail(n,label('title'),'Omschrijving ontbreekt.');if(['series','endDate','water','location','gather','start','end','rod'].some(k=>!blank(raw[k]))||r.fee!==null||r.seriesFee!==null||r.seriesFeeAow!==null||r.looseFeeAow!==null)fail(n,'Vorm','Vul bij een overige uitgave alleen omschrijving, eventuele datum en Begroot in.');}
   else{
    if(!r.title&&!r.series&&!r.water)fail(n,label('title'),'Vul een wedstrijdnaam of een viswater in (de app maakt dan zelf een naam, bijvoorbeeld “Koppel Spui”).');
    if(form==='serie'&&!r.series)fail(n,'Serie','Serienaam ontbreekt.');
    if(form!=='serie'&&r.series)fail(n,'Serie','Kies vorm Serie bij een serienaam, of maak de kolom Serie leeg.');
-   if(form!=='serie'&&(r.seriesFee!==null||r.seriesFeeAow!==null))fail(n,'Inleg hele serie','Serie-inleg hoort alleen bij vorm Serie.');
+   if(form!=='serie'&&(r.seriesFee!==null||r.seriesFeeAow!==null||r.looseFeeAow!==null))fail(n,'Inleg hele serie','Serie-inleg en los AOW horen alleen bij vorm Serie.');
    if(r.gather&&r.start&&r.gather>r.start)fail(n,'Lotingtijd','Loting moet uiterlijk bij de start plaatsvinden.');
    if(r.start&&r.end&&r.date&&(r.endDate||r.date)+'T'+r.end<=r.date+'T'+r.start)fail(n,'Eindtijd','Einde moet na de start vallen; vul zo nodig Einddatum in.');
    if(r.endDate&&r.date&&r.endDate<r.date)fail(n,'Einddatum','Einddatum ligt vóór de datum.');
@@ -121,12 +121,12 @@ function read(wb){
  return {year,budget,carry,rows:result,waters,warnings};
 }
 function preview(d,plan,mapping={}){
- const dd=clone(d);C.sync(dd);for(const w of plan.waters||[])W.upsert(dd,w);
+ const dd=clone(d);C.sync(dd);for(const w of plan.waters||[])W.upsert(dd,w);const warnings=[...(plan.warnings||[])];
  const old=rows(dd,plan.year),used=new Set(),items=[];
  for(const src of plan.rows){let e;const r={...src};
   if(Object.hasOwn(mapping,r.line)){e=old.find(e=>e.id===mapping[r.line]);if(mapping[r.line]&&!e)throw Error('Ongeldige koppeling.');}
-  else if(r.id){e=old.find(e=>e.id===r.id);if(!e)throw Error('Rij '+r.line+': de oorspronkelijke post bestaat niet meer in dit jaar. Maak de verborgen kolom _Koppeling leeg of download opnieuw uit deze app.');}
-  else{let same=[];if(r.kind==='match'&&r.date){same=old.filter(e=>e.kind==='match'&&e.date===r.date&&e.form===r.form&&(r.form!=='serie'||norm(e.series)===norm(r.series))&&(!r.water||!e.water||norm(e.water)===norm(r.water)));if(same.length>1)same=same.filter(e=>norm(e.title)===norm(r.title)||(r.start&&e.start===r.start));}
+  else if(r.id&&old.some(e=>e.id===r.id))e=old.find(e=>e.id===r.id);
+  else{if(r.id){warnings.push('Rij '+r.line+' ('+(r.title||r.series)+'): de gekoppelde post bestaat niet meer in de app; de regel is opnieuw herkend op datum, vorm en water.');r.id='';}let same=[];if(r.kind==='match'&&r.date){same=old.filter(e=>e.kind==='match'&&e.date===r.date&&e.form===r.form&&(r.form!=='serie'||norm(e.series)===norm(r.series))&&(!r.water||!e.water||norm(e.water)===norm(r.water)));if(same.length>1)same=same.filter(e=>norm(e.title)===norm(r.title)||(r.start&&e.start===r.start));}
    if(same.length===1)e=same[0];else{const exact=old.filter(e=>e.kind===r.kind&&norm(e.title)===norm(r.title)&&e.date===r.date);if(exact.length===1)e=exact[0];else{const sameName=old.filter(e=>e.kind===r.kind&&norm(e.title)===norm(r.title));if(sameName.length===1)e=sameName[0];}}}
   const explicit=Object.hasOwn(mapping,r.line)||!!r.id;
   // A budget line linked by hand to an existing match inherits what it left blank.
@@ -134,14 +134,18 @@ function preview(d,plan,mapping={}){
   if(r.kind==='match')Object.assign(r,W.complete(dd,r));
   let error='';if(e&&used.has(e.id))error='Dezelfde bestaande post is tweemaal gekoppeld. Maak in Excel de verborgen kolom _Koppeling leeg bij gekopieerde rijen.';else if(e&&e.kind!==r.kind)error='Soort wijzigen bij een bestaande post kan niet.';else if(r.kind==='match'&&!r.date)error='Datum ontbreekt. Vul een datum in of koppel deze regel aan een bestaande wedstrijd.';
   if(e&&!error)used.add(e.id);
-  const cmp=r.kind==='expense'?['title','date','planned']:compareKeys;
-  const changes=cmp.filter(k=>(e?.[k]??'')!==(r[k]??'')).map(k=>({key:k,before:e?.[k],after:r[k]}));
+  const cmp=r.kind==='expense'?['title','date','planned','actual']:compareKeys;
+  // An empty tariff means 0; only Begroot distinguishes "empty" (still to fill) from 0.
+  const same=k=>k==='actual'?(!r.actualPresent||(e?.actual??null)===(r.actual??null)):k==='feeBasis'?(r.kind!=='match'||r.form==='serie'||(e?.feeBasis||'person')===(r.feeBasis||'person')):['fee','seriesFee','seriesFeeAow','looseFeeAow'].includes(k)?(e?.[k]??0)===(r[k]??0):(e?.[k]??'')===(r[k]??'');
+  const changes=cmp.filter(k=>!same(k)).map(k=>({key:k,before:e?.[k],after:r[k]}));
   items.push({row:r,id:error?undefined:e?.id,action:error?'error':e?(changes.length?'update':'same'):'new',changes,explicit,error});
  }
- const missing=old.filter(e=>!used.has(e.id));for(const item of items)if(!item.id&&!item.explicit)item.candidates=missing.filter(e=>e.kind===item.row.kind);
+ const missing=old.filter(e=>!used.has(e.id));// Only ask "new or existing?" when a leftover post could plausibly be the same: same date, no date on either side, or a similar name.
+ const alike=(a,b)=>{a=nameKey(a);b=nameKey(b);return a&&b&&(a===b||(a.length>=5&&b.length>=5&&(a.includes(b)||b.includes(a))));};
+ for(const item of items)if(!item.id&&!item.explicit){const c=missing.filter(e=>e.kind===item.row.kind&&(!e.date||!item.row.date||e.date===item.row.date||alike(e.title,item.row.title)));if(c.length)item.candidates=c;}
  const y=dd.finance.years[plan.year]||{};const budget=[];if(plan.budget!==null&&plan.budget!==(y.budget||0))budget.push({key:'budget',label:'Jaarbudget',before:y.budget||0,after:plan.budget});if(plan.carry!==null&&plan.carry!==(y.carry||0))budget.push({key:'carry',label:'Meegenomen uit vorig jaar',before:y.carry||0,after:plan.carry});
  const waters=(plan.waters||[]).map(w=>{const cur=W.find(d,w.name);const changed=!cur||W.fields.some(f=>(cur[f]||'')!==(w[f]||''));return {...w,action:!cur?'new':changed?'update':'same'};});
- return {year:plan.year,plan,mapping,items,missing,budget,waters,warnings:plan.warnings||[]};
+ return {year:plan.year,plan,mapping,items,missing,budget,waters,warnings};
 }
 function apply(d,p,selected,remove=[]){
  const next=clone(d);C.sync(next);next.roosterItems=next.roosterItems||[];
@@ -154,16 +158,17 @@ function apply(d,p,selected,remove=[]){
  const parents=new Map();
  const renames=new Map();for(const i of chosen){const e=next.finance.entries.find(e=>e.id===i.id),parent=C.seriesFor(next,e);if(!parent||parent.kind!=='series'||norm(parent.title)===norm(i.row.series))continue;if(i.row.form!=='serie')throw Error('Een bestaande seriewedstrijd kan niet via Excel uit de serie worden gehaald.');if(renames.has(parent.id)&&renames.get(parent.id)!==i.row.series)throw Error('Gebruik één nieuwe naam voor de hele serie.');renames.set(parent.id,i.row.series);}
  for(const [pid,name] of renames){const parent=next.finance.entries.find(e=>e.id===pid),children=next.finance.entries.filter(e=>e.seriesId===pid&&e.status!=='cancelled');if(children.some(e=>!chosen.some(i=>i.id===e.id&&norm(i.row.series)===norm(name))))throw Error('Wijzig de serienaam bij alle wedstrijden van de serie samen.');if(next.finance.entries.some(e=>e.kind==='series'&&e.id!==pid&&yearOf(e)===String(p.year)&&norm(e.title)===norm(name)))throw Error('Er bestaat al een andere serie met deze naam.');parent.title=name;parent.seriesKey=p.year+':'+norm(name);for(const e of next.finance.entries.filter(e=>e.seriesId===pid)){const a=next.roosterItems.find(a=>a.id===e.agendaId);if(a)a.serieNaam=name;const w=(next.wedstrijden||[]).find(w=>w.id===e.matchId),comp=(next.competities||[]).find(c=>c.id===w?.competitieId);if(comp&&comp.type==='serie')comp.naam=name;}}
- for(const i of chosen){const r=i.row;let e=next.finance.entries.find(e=>e.id===i.id);if(e?.kind==='match'){const a=next.roosterItems.find(a=>a.id===e.agendaId);if((e.seriesId&&norm(C.seriesFor(next,e)?.title)!==norm(r.series))||(!e.seriesId&&r.form==='serie'&&(e.matchId||C.received(e))))throw Error('Wijzig de serie-indeling van een bestaande wedstrijd in de app.');if(e.matchId&&a?.wedstrijdVorm!==r.form)throw Error('Wijzig de wedstrijdvorm van een gestarte wedstrijd in de app.');}
-  if(!e){e={id:id(),kind:r.kind,status:'planned',payout:0,payments:{},members:[],attachments:[]};next.finance.entries.push(e);}
+ for(const i of chosen){const r=i.row;let e=next.finance.entries.find(e=>e.id===i.id);if(e?.kind==='match'){const a=next.roosterItems.find(a=>a.id===e.agendaId);if((e.seriesId&&norm(C.seriesFor(next,e)?.title)!==norm(r.series))||(!e.seriesId&&r.form==='serie'&&e.matchId))throw Error('Wijzig de serie-indeling van een bestaande wedstrijd in de app.');const w0=(next.wedstrijden||[]).find(w=>w.id===e.matchId),current=a?.wedstrijdVorm||(w0?(C.seriesFor(next,e)?'serie':matchForm(next,w0)):r.form);if(e.matchId&&current!==r.form)throw Error(r.title+': wijzig de wedstrijdvorm van een gestarte wedstrijd in de app.');}
+  if(!e){e={id:id(),kind:r.kind,status:'planned',actual:null,unpaid:{},members:[]};next.finance.entries.push(e);}
   Object.assign(e,{title:r.title,date:r.date,year:r.year});
+  if(r.actualPresent)e.actual=r.actual;
   if(r.kind==='expense'){e.planned=r.planned??0;e.configured=r.planned!==null;e.category=e.category||'Overig';continue;}
   let a=next.roosterItems.find(a=>a.id===e.agendaId);if(!a){a={id:id(),type:'wedstrijd',zichtbaar:true};next.roosterItems.push(a);e.agendaId=a.id;}
   Object.assign(a,{titel:r.title,autoTitel:!!r.autoTitle,datum:r.date,einddatum:r.endDate,wedstrijdVorm:r.form,serieNaam:r.form==='serie'?r.series:'',serieWedstrijdNummer:r.number||'',hengeltype:r.rod,water:r.water,locatie:r.location,verzamelen:r.gather,starttijd:r.start,eindtijd:r.end});
-  if(r.form==='serie'){if(r.number===1)parents.set(norm(r.series),r);}else{e.planned=r.planned??0;e.fee=r.fee??0;e.configured=r.planned!==null;e.feeBasis=['koppel','gescheiden_koppel'].includes(r.form)?'koppel':'person';}
+  if(r.form==='serie'){if(r.number===1)parents.set(norm(r.series),r);}else{e.planned=r.planned??0;e.fee=r.fee??0;e.configured=r.planned!==null;e.feeBasis=r.feeBasis||(['koppel','gescheiden_koppel'].includes(r.form)?'koppel':'person');}
   for(const w of (next.wedstrijden||[]).filter(w=>C.matchIds(next,e.matchId).includes(w.id)))Object.assign(w,{naam:r.title,datum:r.date,water:r.water,locatie:r.location,hengeltype:r.rod,einddatum:r.endDate,verzamelen:r.gather,starttijd:r.start,eindtijd:r.end});
  }
- C.sync(next);for(const [name,r] of parents){const parent=next.finance.entries.find(e=>e.kind==='series'&&yearOf(e)===String(p.year)&&norm(e.title)===name);if(!parent)continue;Object.assign(parent,{planned:r.planned??0,fee:r.seriesFee??0,looseFee:r.fee??0,feeAow:r.seriesFeeAow??0,configured:r.planned!==null,migrationNotice:false});}
+ C.sync(next);for(const [name,r] of parents){const parent=next.finance.entries.find(e=>e.kind==='series'&&yearOf(e)===String(p.year)&&norm(e.title)===name);if(!parent)continue;Object.assign(parent,{planned:r.planned??0,fee:r.seriesFee??0,looseFee:r.fee??0,feeAow:r.seriesFeeAow??0,looseFeeAow:r.looseFeeAow??0,configured:r.planned!==null});if(r.actualPresent)parent.actual=r.actual;}
  for(const rid of remove){if(!p.missing.some(e=>e.id===rid))throw Error('Ongeldige ontbrekende post.');const e=next.finance.entries.find(e=>e.id===rid);if(e.matchId&&(next.uitslagen||[]).some(u=>C.matchIds(next,e.matchId).includes(u.wedstrijdId)))throw Error(e.title+': er zijn al uitslagen; behoud deze post.');C.cancel(e);const a=next.roosterItems.find(a=>a.id===e.agendaId);if(a)a.zichtbaar=false;}
  for(const parent of next.finance.entries.filter(e=>e.kind==='series'&&yearOf(e)===String(p.year))){const children=next.finance.entries.filter(e=>e.seriesId===parent.id);if(children.length&&children.every(e=>e.status==='cancelled'))C.cancel(parent);}
  for(const w of p.waters||[])W.upsert(next,w);
@@ -177,19 +182,19 @@ async function workbook(ExcelJS,d,year){
  ws.getCell('A2').value='Jaar:';ws.getCell('B2').value=Number(year);ws.getCell('C2').value='Jaarbudget:';ws.getCell('D2').value=y.budget?y.budget/100:data.hintBudget?data.hintBudget/100:null;ws.getCell('E2').value='Meegenomen uit vorig jaar:';ws.getCell('F2').value=y.carry?y.carry/100:null;for(const c of ['A2','C2','E2'])ws.getCell(c).font={bold:true};for(const c of ['D2','F2'])ws.getCell(c).numFmt=euro;ws.getCell('B2').alignment={horizontal:'left'};
  const notes=[
   'Verplicht per regel: Vorm, Datum en Viswater of Naam. Laat je de naam leeg, dan maakt de app hem uit vorm en water (“Koppel Spui”; bij een serie “Winterserie · Spui”). Alles anders mag leeg en staat dan in de app als “nog invullen”.',
-  'Serie: elke wedstrijd één regel met eigen water en lotingplek. Begroot en de inleg-tarieven vul je op één willekeurige regel van de serie in. Inleg = per persoon; bij Koppel en Gescheiden koppel per koppel.',
+  'Serie: elke wedstrijd één regel met eigen water en lotingplek. Begroot en de vier inleg-tarieven (los, los AOW, hele serie, hele serie AOW) vul je op één willekeurige regel van de serie in. Inleg los / per wedstrijd = per persoon; bij Koppel en Gescheiden koppel per koppel (schrijf bijv. “5 pp” voor per persoon). Uitbetaald / uitgegeven: alleen invullen als het afwijkt van prijzenpot (inleg + begroot) of begroot.',
   (data.proposal?'Dit is een voorstel op basis van vorig jaar: vul de datums in en pas bedragen aan. ':'')+'Lege lotingplek en tijden worden bij upload aangevuld uit het blad Viswateren. Regels zonder Vorm worden overgeslagen. Datums dd-mm-jjjj, tijden uu:mm.'];
- notes.forEach((text,i)=>{const n=3+i;ws.mergeCells(n,1,n,15);ws.getCell(n,1).value=text;ws.getCell(n,1).alignment={wrapText:true,vertical:'top'};ws.getRow(n).height=30;});
+ notes.forEach((text,i)=>{const n=3+i;ws.mergeCells(n,1,n,17);ws.getCell(n,1).value=text;ws.getCell(n,1).alignment={wrapText:true,vertical:'top'};ws.getRow(n).height=30;});
  ws.getRow(7).values=headers;ws.getRow(7).font={bold:true,color:{argb:'FFFFFFFF'}};ws.getRow(7).fill={type:'pattern',pattern:'solid',fgColor:dark};ws.getRow(7).height=32;ws.getRow(7).alignment={vertical:'middle',wrapText:true};
- const widths=[20,34,22,14,14,26,26,12,12,12,14,14,14,18,20,24];widths.forEach((w,i)=>ws.getColumn(i+1).width=w);ws.getColumn(16).hidden=true;ws.views=[{state:'frozen',ySplit:7,xSplit:2}];
- for(const r of data.rows){const m=r.kind==='match';ws.addRow([forms[r.form]||'',r.autoTitle?'':r.title,m?r.series:null,r.date?new Date(r.date+'T00:00:00Z'):null,m&&r.endDate?new Date(r.endDate+'T00:00:00Z'):null,m?r.water:null,m?r.location:null,m?r.gather:null,m?r.start:null,m?r.end:null,m?r.rod:null,r.planned===null?null:r.planned/100,m&&r.fee!==null?r.fee/100:null,m&&r.seriesFee!==null?r.seriesFee/100:null,m&&r.seriesFeeAow!==null?r.seriesFeeAow/100:null,r.id]);}
+ const widths=[20,34,22,14,14,26,26,12,12,12,14,14,20,18,20,16,22,24];widths.forEach((w,i)=>ws.getColumn(i+1).width=w);ws.getColumn(18).hidden=true;ws.views=[{state:'frozen',ySplit:7,xSplit:2}];
+ for(const r of data.rows){const m=r.kind==='match';ws.addRow([forms[r.form]||'',r.autoTitle?'':r.title,m?r.series:null,r.date?new Date(r.date+'T00:00:00Z'):null,m&&r.endDate?new Date(r.endDate+'T00:00:00Z'):null,m?r.water:null,m?r.location:null,m?r.gather:null,m?r.start:null,m?r.end:null,m?r.rod:null,r.planned===null?null:r.planned/100,m&&r.fee!==null?(r.feeBasis==='person'&&['koppel','gescheiden_koppel'].includes(r.form)?(r.fee/100)+' pp':r.fee/100):null,m&&r.seriesFee!==null?r.seriesFee/100:null,m&&r.seriesFeeAow!==null?r.seriesFeeAow/100:null,m&&r.looseFeeAow!==null?r.looseFeeAow/100:null,r.actual===null||r.actual===undefined?null:r.actual/100,r.id]);}
  const end=Math.max(107,7+data.rows.length+20),waterRange='Viswateren!$A$2:$A$'+Math.max(2,waters.length+21);
- for(let n=8;n<=end;n++){const row=ws.getRow(n),r=data.rows[n-8];for(let c=1;c<=15;c++){const cell=ws.getCell(n,c);cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:n%2?'FFF0F6F4':'FFFFFFFF'}};cell.alignment={vertical:'middle'};if(c===4||c===5)cell.numFmt='dd-mm-yyyy';if(c>=12)cell.numFmt=euro;}
-  if(r&&(r.hinted||r.proposal||!r.id))for(let c=1;c<=15;c++)ws.getCell(n,c).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFF4D6'}};row.height=22;
+ for(let n=8;n<=end;n++){const row=ws.getRow(n),r=data.rows[n-8];for(let c=1;c<=17;c++){const cell=ws.getCell(n,c);cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:n%2?'FFF0F6F4':'FFFFFFFF'}};cell.alignment={vertical:'middle'};if(c===4||c===5)cell.numFmt='dd-mm-yyyy';if(c>=12)cell.numFmt=euro;}
+  if(r&&(r.hinted||r.proposal||!r.id))for(let c=1;c<=17;c++)ws.getCell(n,c).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFF4D6'}};row.height=22;
   ws.getCell(n,1).dataValidation={type:'list',allowBlank:true,formulae:['"Individueel,Koppel,Gescheiden koppel,Serie,Overige uitgave"'],showErrorMessage:true,error:'Kies een waarde uit de lijst.'};
   ws.getCell(n,11).dataValidation={type:'list',allowBlank:true,formulae:['"Vaste stok,Vrij"'],showErrorMessage:true,error:'Kies Vaste stok of Vrij.'};
   ws.getCell(n,6).dataValidation={type:'list',allowBlank:true,formulae:[waterRange],showErrorMessage:false};}
- ws.autoFilter={from:'A7',to:'P'+end};
+ ws.autoFilter={from:'A7',to:'R'+end};
  const wsW=wb.addWorksheet('Viswateren');wsW.getRow(1).values=['Viswater','Locatie loting','Lotingtijd','Starttijd','Eindtijd'];wsW.getRow(1).font={bold:true,color:{argb:'FFFFFFFF'}};wsW.getRow(1).fill={type:'pattern',pattern:'solid',fgColor:dark};wsW.getRow(1).height=28;[28,30,12,12,12].forEach((w,i)=>wsW.getColumn(i+1).width=w);wsW.views=[{state:'frozen',ySplit:1}];
  for(const w of waters)wsW.addRow([w.name,w.location,w.gather,w.start,w.end]);
  for(let n=2;n<=waters.length+21;n++)for(let c=1;c<=5;c++){wsW.getCell(n,c).fill={type:'pattern',pattern:'solid',fgColor:{argb:n%2?'FFF0F6F4':'FFFFFFFF'}};}
