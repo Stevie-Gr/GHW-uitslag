@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
@@ -1548,6 +1548,7 @@ body.mobile-nav-open .sidebar-overlay{
 }
 
 </style>
+<link rel="stylesheet" href="./finance.css">
 </head>
 <body>
 <div class="shell">
@@ -1809,6 +1810,8 @@ function ensureAdminData(d){
     verzamelen:String(item.verzamelen||'').trim(),
     starttijd:String(item.starttijd||'').trim(),
     eindtijd:String(item.eindtijd||'').trim(),
+    einddatum:String(item.einddatum||'').trim(),
+    hengeltype:String(item.hengeltype||'').trim(),
     locatie:String(item.locatie||'').trim(),
     omschrijving:String(item.omschrijving||'').trim(),
     opmerking:String(item.opmerking||'').trim(),
@@ -1971,6 +1974,7 @@ function getRoosterWedstrijdVormMeta(vorm){
   return {label:'Solo', tagClass:'tag-l'};
 }
 function getRoosterWedstrijdTitelFromItem(item){
+  if(item.titel) return item.titel;
   if(item.type==='wedstrijd' && item.wedstrijdVorm==='serie'){
     const basis=String(item.serieNaam||item.titel||'Serie').trim();
     const nummer=Number.isInteger(Number(item.serieWedstrijdNummer))&&Number(item.serieWedstrijdNummer)>0?Number(item.serieWedstrijdNummer):null;
@@ -7483,6 +7487,8 @@ function saveRoosterItem(){
     verzamelen:(document.getElementById('rooster-item-verzamelen')?.value||'').trim(),
     starttijd:(document.getElementById('rooster-item-start')?.value||'').trim(),
     eindtijd:(document.getElementById('rooster-item-einde')?.value||'').trim(),
+    einddatum:document.getElementById('rooster-item-einddatum')?.value ?? bestaandItem?.einddatum ?? '',
+    hengeltype:document.getElementById('rooster-item-hengeltype')?.value ?? bestaandItem?.hengeltype ?? '',
     locatie:(document.getElementById('rooster-item-locatie')?.value||'').trim(),
     omschrijving:(document.getElementById('rooster-item-omschrijving')?.value||'').trim(),
     opmerking:(document.getElementById('rooster-item-opmerking')?.value||'').trim(),
@@ -12422,5 +12428,13 @@ window.addEventListener('orientationchange', ()=>{ setViewportHeight(); syncResp
 syncWelcomeLogo();
 nav('welcome');
 </script>
+<script src="./pdf-lib.min.js"></script>
+<script src="./finance-core.js"></script>
+<script src="./finance-series.js"></script>
+<script src="./finance-waters.js"></script>
+<script src="./finance-plan.js"></script>
+<script src="./finance-begroting-2026.js"></script>
+<script src="./finance.js"></script>
+<script src="./finance-agenda.js"></script>
 </body>
 </html>
