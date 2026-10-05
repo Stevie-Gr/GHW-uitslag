@@ -1846,6 +1846,24 @@ function ensureAdminData(d){
     const eersteActieve=d.admins.find(a=>a.actief!==false) || d.admins[0];
     if(eersteActieve) eersteActieve.rol='hoofd';
   }
+  // Nul vangst (0 gram) mag geen handmatige rang/lotingplek hebben: die zou de
+  // vaste nulpunten overschrijven. Ruimt ook eerder opgeslagen uitslagen op.
+  if(Array.isArray(d.uitslagen)){
+    const wedstrijden=Array.isArray(d.wedstrijden)?d.wedstrijden:[];
+    d.uitslagen.forEach(u=>{
+      if(!u||u.afwezig||u.rang==null) return;
+      let totaal=Number(u.gewicht)||0;
+      if(u.koppelId){
+        const w=wedstrijden.find(x=>x.id===u.wedstrijdId);
+        if(!isGescheidenKoppelWedstrijd(w)){
+          totaal=d.uitslagen
+            .filter(x=>x&&x.wedstrijdId===u.wedstrijdId&&x.koppelId===u.koppelId&&!x.afwezig)
+            .reduce((sum,x)=>sum+(Number(x.gewicht)||0),0);
+        }
+      }
+      if(totaal===0) u.rang=null;
+    });
+  }
   return d;
 }
 
@@ -2573,6 +2591,47 @@ function renderSerieInvoer(){
 const SERIE_NUL_PUNTEN = 4;
 const SERIE_AFWEZIG_PUNTEN = 5;
 
+// Aantal eenheden in een vak: vissers, of koppels bij een koppelwedstrijd
+// (twee vissers met hetzelfde koppelId tellen als één eenheid).
+function telEenhedenInVak(vak, uit, negeerKoppels){
+  const vids=(vak?.vissers||[]);
+  if(negeerKoppels) return vids.length;
+  const koppels=new Set();
+  let n=0;
+  vids.forEach(vid=>{
+    const u=uit.find(x=>x.visserId===vid&&!x.afwezig);
+    if(u?.koppelId){
+      if(!koppels.has(u.koppelId)){ koppels.add(u.koppelId); n++; }
+    } else {
+      n++;
+    }
+  });
+  return n;
+}
+
+// Plaats voor nul vangst (0 gram): altijd de laatste plek van het grootste vak,
+// ongeacht hoeveel vissers er in het eigen vak zaten. Zonder vakken: de laatste
+// plaats van de wedstrijd (aantal deelnemende eenheden).
+function getNulVangstPlaats(w, d){
+  if(!w) return 1;
+  const uit=d.uitslagen.filter(u=>u.wedstrijdId===w.id);
+  const negeerKoppels=isGescheidenKoppelWedstrijd(w);
+  const vakken=normalizeVakken(w.vakken||[]);
+  if(vakken.length){
+    return Math.max(1, ...vakken.map(v=>telEenhedenInVak(v, uit, negeerKoppels)));
+  }
+  const koppels=new Set();
+  let n=0;
+  uit.filter(u=>!u.afwezig).forEach(u=>{
+    if(!negeerKoppels&&u.koppelId){
+      if(!koppels.has(u.koppelId)){ koppels.add(u.koppelId); n++; }
+    } else {
+      n++;
+    }
+  });
+  return Math.max(1, n);
+}
+
 // Geeft per wedstrijd een map: visserId -> { punten, label, afwezig }
 function berekenPuntenWedstrijd(wId, d, opts={}) {
   const w = d.wedstrijden.find(x=>x.id===wId);
@@ -2583,8 +2642,8 @@ function berekenPuntenWedstrijd(wId, d, opts={}) {
   const vakken = (w.vakken||[]);
   const negeerKoppels = isGescheidenKoppelWedstrijd(w);
 
-  // Grootste vak grootte
-  const grootsteVak = Math.max(1, ...vakken.map(v=>v.vissers.length));
+  // Grootste vak grootte, geteld in eenheden (koppels tellen als één)
+  const grootsteVak = Math.max(1, ...vakken.map(v=>telEenhedenInVak(v, uit, negeerKoppels)));
   const vasteSeriePunten = opts.mode === 'serie-vast';
   const serieVissers = Array.isArray(opts.serieVissers) ? opts.serieVissers : [];
 
@@ -2619,15 +2678,18 @@ function berekenPuntenWedstrijd(wId, d, opts={}) {
     });
 
     // Wijs punten toe: positie = punt (1e=1, 2e=2, gelijkspel = zelfde)
+    // Nul vangst (0 gram) krijgt altijd de vaste nulpunten; een handmatige
+    // rang of lotingplek telt daar niet voor mee (twee keer 0 gram = zelfde punten).
     let rank=1;
     eenheden.forEach((e,i)=>{
-      if(normalizeRangValue(e.rang)!=null){
-        rank=normalizeRangValue(e.rang);
+      const handRang = e.gewicht===0 ? null : normalizeRangValue(e.rang);
+      if(handRang!=null){
+        rank=handRang;
       } else if(i>0&&e.gewicht!==eenheden[i-1].gewicht){
         rank=i+1;
       }
-      const punten = normalizeRangValue(e.rang)!=null
-        ? normalizeRangValue(e.rang)
+      const punten = handRang!=null
+        ? handRang
         : (e.gewicht===0 ? (vasteSeriePunten ? SERIE_NUL_PUNTEN : grootsteVak) : rank);
       e.vids.forEach(vid=>{
         result[vid]={punten, vak:vak.naam, afwezig:false, nulVangst:e.gewicht===0};
@@ -2882,9 +2944,10 @@ function getWedstrijdTopDrieData(w,d){
   let vorigeGewicht=null;
   let vorigeRank=null;
   let actiefIndex=0;
+  const nulPlaats=getNulVangstPlaats(w,d);
   return eenheden.slice(0,3).map(e=>{
     actiefIndex++;
-    const displayRank=normalizeRangValue(e.rang)??((vorigeGewicht!==null&&e.gewicht===vorigeGewicht)?vorigeRank:actiefIndex);
+    const displayRank=e.gewicht===0?nulPlaats:(normalizeRangValue(e.rang)??((vorigeGewicht!==null&&e.gewicht===vorigeGewicht)?vorigeRank:actiefIndex));
     vorigeGewicht=e.gewicht;
     vorigeRank=displayRank;
     return {...e,displayRank};
@@ -3253,12 +3316,13 @@ function renderLos(){
       let vorigeGewicht=null;
       let vorigeRank=null;
       let actiefIndex=0;
+      const nulPlaats=getNulVangstPlaats(w,d);
       const podiumRows=eenheden.map(e=>{
         actiefIndex++;
-        const rang=normalizeRangValue(e.rang)??((vorigeGewicht!==null&&e.gewicht===vorigeGewicht)?vorigeRank:actiefIndex);
+        const rang=e.gewicht===0?nulPlaats:(normalizeRangValue(e.rang)??((vorigeGewicht!==null&&e.gewicht===vorigeGewicht)?vorigeRank:actiefIndex));
         vorigeGewicht=e.gewicht;
         vorigeRank=rang;
-        const gedeeld=eenheden.some(other=>other!==e&&other.gewicht===e.gewicht&&(normalizeRangValue(other.rang)??rang)===rang);
+        const gedeeld=e.gewicht!==0&&eenheden.some(other=>other!==e&&other.gewicht===e.gewicht&&(normalizeRangValue(other.rang)??rang)===rang);
         return {...e,displayRank:rang,gedeeld};
       });
       podiumHtml=podiumRows.slice(0,3).map((e,i)=>`
@@ -3665,6 +3729,7 @@ function bouwWedstrijdDetail(w, d, onTerug, isSerie){
   const uit=d.uitslagen.filter(u=>u.wedstrijdId===w.id);
   const uitActief=uit.filter(u=>!u.afwezig);
   const grootsteVak=Math.max(1,...(vakken.length?vakken.map(v=>v.vissers.length):[uitActief.length]));
+  const nulPlaats=getNulVangstPlaats(w,d);
   const totGew=uitActief.reduce((a,u)=>a+u.gewicht,0);
   const getRankClass=(rank)=>rank===1?'r1':rank===2?'r2':rank===3?'r3':'rx';
   const buildRankMeta=(items)=>{
@@ -3673,20 +3738,24 @@ function bouwWedstrijdDetail(w, d, onTerug, isSerie){
     let vorigeRank=null;
     const enriched=items.map(item=>{
       if(item.afwezig){
-        return {...item,displayRank:null,manualRank:false,sharedRank:false,rankLabel:''};
+        return {...item,displayRank:null,manualRank:false,sharedRank:false,rankLabel:'',nulVangst:false};
       }
       actiefIndex++;
-      const handmatig=normalizeRangValue(item.rang);
+      // Nul vangst: altijd laatste plek van het grootste vak, geen loting/gedeeld-label
+      const nulVangst=item.gewicht===0;
+      const handmatig=nulVangst?null:normalizeRangValue(item.rang);
       let displayRank=handmatig;
-      if(displayRank==null){
+      if(nulVangst){
+        displayRank=nulPlaats;
+      } else if(displayRank==null){
         displayRank=(vorigeGewicht!==null&&item.gewicht===vorigeGewicht)?vorigeRank:actiefIndex;
       }
       vorigeGewicht=item.gewicht;
       vorigeRank=displayRank;
-      return {...item,displayRank,manualRank:handmatig!=null,sharedRank:false,rankLabel:''};
+      return {...item,displayRank,manualRank:handmatig!=null,sharedRank:false,rankLabel:'',nulVangst};
     });
     return enriched.map(item=>{
-      if(item.afwezig||item.displayRank==null) return item;
+      if(item.afwezig||item.displayRank==null||item.nulVangst) return item;
       const sharedRank=enriched.some(other=>
         other!==item &&
         !other.afwezig &&
@@ -4735,6 +4804,7 @@ function buildGescheidenVakTables(w, d){
   const vakken=normalizeVakken(w.vakken||[]);
   const uit=d.uitslagen.filter(u=>u.wedstrijdId===w.id);
   const wp=berekenPuntenWedstrijd(w.id,d);
+  const nulPlaats=getNulVangstPlaats(w,d);
   if(!uit.some(u=>!u.afwezig)){
     return '<div class="card"><div class="sub">Nog geen uitslag ingevoerd voor deze wedstrijd.</div></div>';
   }
@@ -4763,8 +4833,10 @@ function buildGescheidenVakTables(w, d){
       return a.naam.localeCompare(b.naam,'nl');
     });
     const cellPad=mobiel?'padding:8px 6px;':'';
+    // Nul vangst: altijd laatste plek van het grootste vak
+    const plaatsVan=(item, idx)=>item.gewicht===0?nulPlaats:idx+1;
     const rows=deelnemers.map((item, idx)=>`<tr>
-      <td style="${cellPad}${mobiel?'width:36px':''}">${item.afwezig?'&mdash;':`<div class="rank ${idx===0?'r1':idx===1?'r2':idx===2?'r3':'rx'}" style="${mobiel?'width:22px;height:22px;font-size:11px':''}">${idx+1}</div>`}</td>
+      <td style="${cellPad}${mobiel?'width:36px':''}">${item.afwezig?'&mdash;':`<div class="rank ${plaatsVan(item,idx)===1?'r1':plaatsVan(item,idx)===2?'r2':plaatsVan(item,idx)===3?'r3':'rx'}" style="${mobiel?'width:22px;height:22px;font-size:11px':''}">${plaatsVan(item,idx)}</div>`}</td>
       <td style="${cellPad}font-weight:600;${mobiel?'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0;font-size:13px':''}">${escapeHtml(item.naam)}</td>
       <td class="r tb" style="${cellPad}${mobiel?'white-space:nowrap;font-size:13px':''}">${item.afwezig?'<span class="tag tag-af">Afwezig</span>':`${kg(item.gewicht)} kg`}</td>
       ${mobiel?'':`<td class="r tg" style="${cellPad}">${item.punten??'&mdash;'}</td>`}
@@ -5404,7 +5476,7 @@ function getWedstrijdVakNaamVoorVisser(w, vid){
   return vak?getDisplayVakNaam(vak,vakken.indexOf(vak)):'';
 }
 
-function buildShareRankedRows(rows){
+function buildShareRankedRows(rows, nulPlaats=null){
   const sorted=[...rows].sort((a,b)=>{
     if((b.gewicht||0)!==(a.gewicht||0)) return (b.gewicht||0)-(a.gewicht||0);
     const rangA=normalizeRangValue(a.rang);
@@ -5426,6 +5498,8 @@ function buildShareRankedRows(rows){
     } else if(currentRang!=null && vorigeRang!=null && currentRang!==vorigeRang){
       rank=currentRang;
     }
+    // Nul vangst: altijd de laatste plek van het grootste vak
+    if((row.gewicht||0)===0 && nulPlaats) return {...row, place:nulPlaats};
     return {...row, place:rank};
   });
 }
@@ -5433,6 +5507,7 @@ function buildShareRankedRows(rows){
 function getUitslagImageSections(w, d){
   const uitActief=d.uitslagen.filter(u=>u.wedstrijdId===w.id && !u.afwezig);
   const vakken=normalizeVakken(w.vakken||[]);
+  const nulPlaats=getNulVangstPlaats(w,d);
   if(isGescheidenKoppelWedstrijd(w)){
     const groepen={};
     uitActief.forEach(u=>{
@@ -5463,7 +5538,7 @@ function getUitslagImageSections(w, d){
       title:'Uitslag',
       subtitle:`${pairs.length} koppels`,
       kind:'pairs',
-      rows:buildShareRankedRows(pairs)
+      rows:buildShareRankedRows(pairs, nulPlaats)
     }];
   }
   if(w.isKoppel){
@@ -5495,7 +5570,7 @@ function getUitslagImageSections(w, d){
       title:'Uitslag',
       subtitle:`${pairs.length} koppels`,
       kind:'pairs',
-      rows:buildShareRankedRows(pairs)
+      rows:buildShareRankedRows(pairs, nulPlaats)
     }];
   }
   if(vakken.length){
@@ -5516,7 +5591,7 @@ function getUitslagImageSections(w, d){
         title:`Vak ${vakNaam}`,
         subtitle:`${rows.length} vissers`,
         kind:'rows',
-        rows:buildShareRankedRows(rows)
+        rows:buildShareRankedRows(rows, nulPlaats)
       };
     }).filter(section=>section.rows.length);
   }
@@ -5533,7 +5608,7 @@ function getUitslagImageSections(w, d){
     title:'Uitslag',
     subtitle:`${rows.length} vissers`,
     kind:'rows',
-    rows:buildShareRankedRows(rows)
+    rows:buildShareRankedRows(rows, nulPlaats)
   }];
 }
 
@@ -9708,7 +9783,8 @@ function computeFreshLotingGroups(){
       }
       const baseRank=hoger+1;
       hoger+=level.length;
-      if(level.length<2) continue;
+      // Nul vangst: geen loting nodig, 0 gram deelt altijd dezelfde plek en punten
+      if(level.length<2||gewicht===0) continue;
       groups.push({
         groupId:`${bucket.vakId}__${gewicht}__${level.map(item=>item.entityKey).sort().join('||')}`,
         vakId:bucket.vakId,
