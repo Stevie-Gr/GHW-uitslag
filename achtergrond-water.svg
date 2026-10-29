@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="lucht" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#07131d"/>
+      <stop offset=".35" stop-color="#16283a"/>
+      <stop offset=".62" stop-color="#5a4a55"/>
+      <stop offset=".80" stop-color="#c9764a"/>
+      <stop offset="1" stop-color="#f0a85e"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3a48"/>
+      <stop offset=".18" stop-color="#1c2a38"/>
+      <stop offset="1" stop-color="#06111a"/>
+    </linearGradient>
+    <radialGradient id="gloed" cx="1150" cy="372" r="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffd08a" stop-opacity=".75"/>
+      <stop offset=".25" stop-color="#f29a55" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#f29a55" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="zon" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#fff3d6"/>
+      <stop offset=".7" stop-color="#ffd38c"/>
+      <stop offset="1" stop-color="#f6a95e"/>
+    </radialGradient>
+    <linearGradient id="spiegel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffc77e" stop-opacity=".85"/>
+      <stop offset="1" stop-color="#ffc77e" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="boven"><rect x="0" y="0" width="1600" height="372"/></clipPath>
+  </defs>
+
+  <rect width="1600" height="372" fill="url(#lucht)"/>
+  <rect width="1600" height="600" fill="url(#gloed)"/>
+  <circle cx="1150" cy="380" r="62" fill="url(#zon)" clip-path="url(#boven)"/>
+
+  <!-- wolkensluiers -->
+  <g fill="#f6b07a" opacity=".22">
+    <ellipse cx="980" cy="250" rx="260" ry="9"/>
+    <ellipse cx="1320" cy="215" rx="200" ry="7"/>
+    <ellipse cx="760" cy="292" rx="180" ry="6"/>
+  </g>
+
+  <!-- bomenrij aan de overkant -->
+  <path fill="#14202a" d="M0 372 V338 q30-14 60-4 q22-22 54-10 q30-18 62 0 q26-10 50 6 q40-20 80-2 q36-12 66 4 q28-16 58 0 q24-6 44 8 L600 360 q40-6 90 2 q60-4 120 4 L1000 368 q60-8 110-2 q30-16 64-2 q36-18 70 0 q30-10 58 4 q34-16 70 0 q28-10 56 6 q30-14 62 0 q20-8 40 4 V372 Z"/>
+  <path fill="#0e1820" d="M0 372 V356 q80-10 160 0 q120-8 240 2 q200-6 400 4 q260-6 500 0 q160-8 300 -4 V372 Z"/>
+
+  <!-- water -->
+  <rect y="372" width="1600" height="228" fill="url(#water)"/>
+  <ellipse cx="1150" cy="420" rx="110" ry="80" fill="url(#spiegel)" opacity=".22"/>
+  <g fill="#ffcf8a">
+    <rect x="1098" y="378" width="104" height="3" rx="1.5" opacity=".8"/>
+    <rect x="1078" y="390" width="144" height="3" rx="1.5" opacity=".6"/>
+    <rect x="1112" y="402" width="76" height="2.5" rx="1.2" opacity=".65"/>
+    <rect x="1060" y="416" width="180" height="2.5" rx="1.2" opacity=".4"/>
+    <rect x="1104" y="432" width="92" height="2" rx="1" opacity=".45"/>
+    <rect x="1050" y="452" width="200" height="2" rx="1" opacity=".25"/>
+    <rect x="1118" y="474" width="64" height="2" rx="1" opacity=".3"/>
+    <rect x="1070" y="500" width="160" height="2" rx="1" opacity=".15"/>
+  </g>
+  <g fill="#9fb4c4" opacity=".10">
+    <rect x="200" y="420" width="420" height="1.5"/>
+    <rect x="700" y="446" width="300" height="1.5"/>
+    <rect x="1300" y="436" width="240" height="1.5"/>
+    <rect x="360" y="500" width="520" height="1.5"/>
+  </g>
+
+  <!-- ochtendnevel -->
+  <g fill="#dfe6ee" opacity=".07">
+    <ellipse cx="500" cy="370" rx="520" ry="22"/>
+    <ellipse cx="1300" cy="376" rx="420" ry="16"/>
+  </g>
+
+  <!-- dobber met kringen -->
+  <g transform="translate(700 478)">
+    <ellipse rx="70" ry="9" fill="none" stroke="#ffc98a" stroke-opacity=".18" stroke-width="2"/>
+    <ellipse rx="42" ry="5.5" fill="none" stroke="#ffc98a" stroke-opacity=".28" stroke-width="2"/>
+    <ellipse rx="18" ry="2.6" fill="none" stroke="#ffc98a" stroke-opacity=".4" stroke-width="1.6"/>
+    <path d="M-3 0 V-30 Q0 -36 3 -30 V0 Z" fill="#e2493a"/>
+    <path d="M-3.4 0 V-12 H3.4 V0 Z" fill="#f2eee6"/>
+    <rect x="-.8" y="-46" width="1.6" height="16" fill="#e2493a"/>
+  </g>
+
+  <!-- riet op de voorgrond -->
+  <g stroke="#050c12" stroke-linecap="round" fill="none">
+    <path d="M250 600 Q262 470 236 360" stroke-width="5"/>
+    <path d="M272 600 Q286 480 300 330" stroke-width="4.5"/>
+    <path d="M292 600 Q300 500 344 404" stroke-width="4"/>
+    <path d="M232 600 Q220 520 186 430" stroke-width="4"/>
+    <path d="M316 600 Q330 530 386 470" stroke-width="3.5"/>
+    <path d="M210 600 Q196 540 150 492" stroke-width="3.5"/>
+    <path d="M1480 600 Q1474 520 1500 430" stroke-width="4"/>
+    <path d="M1500 600 Q1510 530 1548 466" stroke-width="3.5"/>
+    <path d="M1462 600 Q1450 540 1420 500" stroke-width="3"/>
+  </g>
+  <g fill="#050c12">
+    <rect x="229" y="300" width="12" height="64" rx="6" transform="rotate(-8 235 332)"/>
+    <rect x="296" y="268" width="11" height="58" rx="5.5" transform="rotate(10 301 297)"/>
+    <rect x="1494" y="380" width="10" height="52" rx="5" transform="rotate(12 1499 406)"/>
+  </g>
+</svg>
