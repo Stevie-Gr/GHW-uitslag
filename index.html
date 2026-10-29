@@ -931,6 +931,20 @@ body[data-page="nieuws"] .topbar-title{color:var(--accent-news)}
   text-shadow:0 1px 8px rgba(0,0,0,.6);
 }
 .wh-hero-titel{margin:0;line-height:0}
+.wh-hero-site{
+  align-self:flex-start;
+  color:rgba(232,240,246,.72);
+  font-size:13px;
+  font-weight:600;
+  text-decoration:none;
+  text-shadow:0 1px 8px rgba(0,0,0,.6);
+  border-bottom:1px solid rgba(232,240,246,.25);
+  padding-bottom:1px;
+  transition:color .15s,border-color .15s;
+}
+.wh-hero-site span{display:inline-block;margin-left:4px;transition:transform .15s}
+.wh-hero-site:hover{color:var(--g);border-color:var(--g)}
+.wh-hero-site:hover span{transform:translateX(3px)}
 .wh-hero-titel img{
   display:block;
   width:min(380px,100%);
@@ -3784,6 +3798,7 @@ function renderWelcomeDashboard(){
         <div class="wh-hero-inhoud">
           <div class="wh-hero-kicker">Welkom bij de uitslagen van</div>
           <h1 class="wh-hero-titel"><img src="logo-donker.png" alt="Hengelsportvereniging Groot Hoeksche Waard" width="1000" height="290"></h1>
+          <a class="wh-hero-site" href="https://hsvgroothoekschewaard.mijnhsv.nl/" target="_blank" rel="noopener">Naar de verenigingswebsite <span aria-hidden="true">→</span></a>
         </div>
       </header>
       <div class="wh-rij">
