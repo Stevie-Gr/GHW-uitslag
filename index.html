@@ -2269,6 +2269,46 @@ async function meldCloudConflict(){
   const ok = await laadCloud();
   if(ok) restoreScreen(currentScreen);
 }
+
+// Nieuwsfoto's staan als losse bestanden in Supabase Storage; in de data staat alleen de URL.
+const FOTO_BUCKET = 'nieuws-fotos';
+async function uploadNieuwsFoto(dataUrl, itemId){
+  if(!cloudClient) throw new Error('geen verbinding');
+  const blob = await (await fetch(dataUrl)).blob();
+  const ext = blob.type==='image/png' ? 'png' : blob.type==='image/webp' ? 'webp' : 'jpg';
+  const pad = `${itemId}-${Date.now()}.${ext}`;
+  const {error} = await cloudClient.storage.from(FOTO_BUCKET).upload(pad, blob, {contentType:blob.type||'image/jpeg', cacheControl:'31536000'});
+  if(error) throw error;
+  return cloudClient.storage.from(FOTO_BUCKET).getPublicUrl(pad).data.publicUrl;
+}
+function nieuwsFotoPad(url){
+  const m = String(url||'').match(/\/storage\/v1\/object\/public\/nieuws-fotos\/([^?#]+)$/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+async function verwijderNieuwsFotoBestand(url){
+  const pad = nieuwsFotoPad(url);
+  if(!pad || !cloudClient || !isAdmin) return;
+  try{ await cloudClient.storage.from(FOTO_BUCKET).remove([pad]); }catch(e){}
+}
+// Eenmalig per sessie: foto's die nog als data-URL in de gegevens staan naar Storage verhuizen.
+let fotosVerhuisd = false;
+async function verhuisNieuwsFotos(){
+  if(fotosVerhuisd || !isAdmin || !cloudClient || cloudConflict) return;
+  const oud = getData().nieuwsItems.filter(n=>String(n.foto||'').startsWith('data:'));
+  if(!oud.length) return;
+  fotosVerhuisd = true;
+  const nieuweUrls = {};
+  try{
+    for(const n of oud) nieuweUrls[n.id] = {van:n.foto, naar:await uploadNieuwsFoto(n.foto, n.id)};
+  }catch(e){
+    fotosVerhuisd = false;
+    return;
+  }
+  // Opnieuw ophalen: tijdens het uploaden kan er al iets anders gewijzigd zijn.
+  const d = getData();
+  d.nieuwsItems.forEach(n=>{ const u=nieuweUrls[n.id]; if(u && n.foto===u.van) n.foto=u.naar; });
+  saveData(d);
+}
 async function startCloud(){
   if(!cloudClient) return;
   try{
@@ -2276,6 +2316,7 @@ async function startCloud(){
     if(data?.session && await activeerAdminSessie(data.session)) updateAdminUi();
   }catch(e){}
   if(await laadCloud()) restoreScreen(currentScreen);
+  verhuisNieuwsFotos();
 }
 document.addEventListener('visibilitychange', async ()=>{
   if(document.visibilityState!=='visible' || isAdmin || !cloudClient) return;
@@ -2341,6 +2382,7 @@ async function checkPin(){
   updateAdminUi();
   renderAdminHome();
   nav('admin-home');
+  verhuisNieuwsFotos();
 }
 async function doLogout(){
   isAdmin=false;
@@ -9390,6 +9432,8 @@ function applyNieuwsCrop(){
     nieuwsCropDirty=false;
     renderBeheer();
   };
+  // Online foto (Storage) opnieuw bijsnijden: zonder CORS kan het canvas niet worden uitgelezen.
+  if(!nieuwsRawFotoDataUrl.startsWith('data:')) img.crossOrigin='anonymous';
   img.src=nieuwsRawFotoDataUrl;
 }
 
@@ -9450,8 +9494,9 @@ function verwijderNieuwsFoto(){
   renderBeheer();
 }
 
-function saveNieuwsItem(forceStatus=null){
-  const d=getData();
+let nieuwsOpslaanBezig=false;
+async function saveNieuwsItem(forceStatus=null){
+  if(nieuwsOpslaanBezig) return;
   captureNieuwsDraftFromForm();
   if(nieuwsRawFotoDataUrl && nieuwsCropDirty){
     alert('Sla eerst de foto-uitsnede op via "Gebruik uitsnede", zodat de nieuwsfoto netjes past op de website.');
@@ -9471,7 +9516,21 @@ function saveNieuwsItem(forceStatus=null){
     alert('Vul inhoud in voor het nieuwsartikel.');
     return;
   }
+  if(basis.foto.startsWith('data:')){
+    nieuwsOpslaanBezig=true;
+    showAppNotice('Foto uploaden…');
+    try{
+      basis.foto=await uploadNieuwsFoto(basis.foto, basis.id);
+    }catch(e){
+      alert('De foto kon niet online worden opgeslagen. Controleer je internetverbinding en probeer het opnieuw.');
+      return;
+    }finally{
+      nieuwsOpslaanBezig=false;
+    }
+  }
+  const d=getData();
   const bestaand=nieuwsBeheerEditId?d.nieuwsItems.find(item=>item.id===nieuwsBeheerEditId):null;
+  const oudeFoto=bestaand?.foto||'';
   const item={
     ...basis,
     id:bestaand?.id||basis.id,
@@ -9485,6 +9544,7 @@ function saveNieuwsItem(forceStatus=null){
     d.nieuwsItems.unshift(item);
   }
   saveData(d);
+  if(oudeFoto && oudeFoto!==item.foto) verwijderNieuwsFotoBestand(oudeFoto);
   nieuwsBeheerEditId=item.id;
   nieuwsFotoDataUrl=item.foto||'';
   nieuwsRawFotoDataUrl=item.foto||'';
@@ -9513,6 +9573,7 @@ function verwijderNieuwsItem(id){
   if(!confirm(`Weet je zeker dat je dit nieuwsartikel wilt verwijderen?\n\n${item.titel}`)) return;
   d.nieuwsItems=d.nieuwsItems.filter(entry=>entry.id!==id);
   saveData(d);
+  verwijderNieuwsFotoBestand(item.foto);
   if(nieuwsBeheerEditId===id){
     nieuwsBeheerEditId=null;
     nieuwsFotoDataUrl='';
