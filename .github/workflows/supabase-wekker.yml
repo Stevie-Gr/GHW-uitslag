@@ -1,0 +1,18 @@
+# Houdt het gratis Supabase-project actief: een gratis project pauzeert na 7 dagen zonder gebruik.
+# Leest elke 3 dagen de (openbare) uitslagen op; schrijft niets.
+name: Supabase wekker
+
+on:
+  schedule:
+    - cron: '17 6 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  wekker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Uitslagen opvragen
+        run: |
+          curl --fail --silent --show-error \
+            -H "apikey: sb_publishable_xFwxWzzSzgieB-NkftM1IQ_aVjFuv7Y" \
+            "https://nvputjtfxwefeowstoxv.supabase.co/rest/v1/app_state?select=version&id=eq.1"

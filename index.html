@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="./lib/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;max-width:100%;overflow-x:hidden;background:#071016;color:#eef3f1;font-family:'Barlow',sans-serif;font-size:15px;-webkit-text-size-adjust:100%}
@@ -1715,12 +1716,10 @@ body.mobile-nav-open .sidebar-overlay{
   <div class="pin-card" onclick="event.stopPropagation()">
     <div style="font-size:38px;margin-bottom:10px">🔐</div>
     <div style="font-family:var(--font);font-size:21px;font-weight:800;margin-bottom:4px">Admin inloggen</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Kies je naam en voer je persoonlijke code in</div>
-    <div id="pin-err" class="err" style="display:none">Naam of code klopt niet.</div>
-    <select id="pin-admin-select" style="margin-bottom:10px">
-      <option value="">Kies admin</option>
-    </select>
-    <input type="password" inputmode="numeric" placeholder="Code" id="pin-inp" onkeydown="if(event.key==='Enter')checkPin()" style="text-align:center;font-size:24px;letter-spacing:6px;margin-bottom:10px">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Log in met je e-mailadres en wachtwoord</div>
+    <div id="pin-err" class="err" style="display:none">E-mailadres of wachtwoord klopt niet.</div>
+    <input type="email" autocomplete="username" placeholder="E-mailadres" id="pin-email" onkeydown="if(event.key==='Enter')document.getElementById('pin-inp').focus()" style="margin-bottom:10px">
+    <input type="password" autocomplete="current-password" placeholder="Wachtwoord" id="pin-inp" onkeydown="if(event.key==='Enter')checkPin()" style="margin-bottom:10px">
     <button class="btn btn-g btn-full" onclick="checkPin()">Inloggen</button>
     <button class="btn btn-gh btn-full" style="margin-top:7px" onclick="closePin()">Annuleren</button>
   </div>
@@ -1759,7 +1758,6 @@ body.mobile-nav-open .sidebar-overlay{
 <script>
 // ── Data ──────────────────────────────────────────────────────────────────────
 const SK = 'hsv_ghw_v2';
-const DEFAULT_HOOFD_ADMIN = {id:'head-admin', naam:'Hoofd Admin', code:'1234', rol:'hoofd', actief:true};
 const ADMIN_PAGES = ['admin-home','invoer','serie-invoer','visweek-beheer','import','beheer','backup'];
 let isAdmin = false;
 let currentAdmin = null;
@@ -1831,21 +1829,8 @@ function ensureAdminData(d){
     aangemaaktOp:String(item.aangemaaktOp||item.datum||'').trim(),
     bijgewerktOp:String(item.bijgewerktOp||item.datum||'').trim()
   }));
-  if(!Array.isArray(d.admins) || !d.admins.length){
-    d.admins=[{...DEFAULT_HOOFD_ADMIN}];
-  }
-  d.admins=d.admins.map(a=>({
-    id:a.id||uid(),
-    naam:String(a.naam||'').trim(),
-    code:String(a.code||'').trim(),
-    rol:a.rol==='hoofd'?'hoofd':'admin',
-    actief:a.actief!==false
-  }));
-  const actieveHoofdAdmins=d.admins.filter(a=>a.actief!==false && a.rol==='hoofd');
-  if(!actieveHoofdAdmins.length){
-    const eersteActieve=d.admins.find(a=>a.actief!==false) || d.admins[0];
-    if(eersteActieve) eersteActieve.rol='hoofd';
-  }
+  // Admins staan in Supabase (e-mail + wachtwoord); codes worden niet meer in de data bewaard.
+  d.admins=[];
   // Nul vangst (0 gram) mag geen handmatige rang/lotingplek hebben: die zou de
   // vaste nulpunten overschrijven. Ruimt ook eerder opgeslagen uitslagen op.
   if(Array.isArray(d.uitslagen)){
@@ -1955,6 +1940,7 @@ function getData() {
 }
 function saveData(d){
   localStorage.setItem(SK,JSON.stringify(ensureAdminData(d)));
+  pushCloud();
   if(document.getElementById('pv-welcome')?.classList.contains('active')){
     renderWelcomeDashboard();
   }
@@ -2139,12 +2125,151 @@ function nav(p,addToHistory=true){
   document.body.setAttribute('data-page', p);
 }
 
-// ── Admin ─────────────────────────────────────────────────────────────────────
-function getAdminen(){
-  return getData().admins
-    .filter(a=>a.actief!==false)
-    .sort((a,b)=>(a.naam||'').localeCompare((b.naam||''),'nl',{sensitivity:'base'}));
+// ── Online opslag (Supabase) ──────────────────────────────────────────────────
+// Bezoekers lezen de uitslagen uit Supabase; alleen ingelogde admins kunnen opslaan.
+// localStorage blijft een snelle kopie, zodat getData()/saveData() synchroon blijven.
+const CLOUD_URL = 'https://nvputjtfxwefeowstoxv.supabase.co';
+const CLOUD_KEY = 'sb_publishable_xFwxWzzSzgieB-NkftM1IQ_aVjFuv7Y';
+let cloudClient = null;
+let cloudVersion = null;
+let cloudLeeg = false;
+let cloudBezig = false;
+let cloudOpnieuw = false;
+let cloudConflict = false;
+// Versie waarop een nog niet online opgeslagen wijziging is gebaseerd (bijv. na verlopen sessie).
+const SK_WACHTEND = SK+'_cloud_wachtend';
+try{
+  if(window.supabase) cloudClient = window.supabase.createClient(CLOUD_URL, CLOUD_KEY);
+}catch(e){ cloudClient = null; }
+if(cloudClient){
+  cloudClient.auth.onAuthStateChange(event=>{
+    if(event==='SIGNED_OUT' && isAdmin) zetUitgelogd('Je bent uitgelogd. Log opnieuw in om verder te gaan.');
+  });
 }
+
+function wachtendeVersie(){
+  try{
+    const v = localStorage.getItem(SK_WACHTEND);
+    return v==null ? null : Number(v);
+  }catch(e){ return null; }
+}
+function markeerWachtend(){
+  if(wachtendeVersie()==null) localStorage.setItem(SK_WACHTEND, String(cloudVersion));
+}
+function wisWachtend(){
+  localStorage.removeItem(SK_WACHTEND);
+}
+function zetUitgelogd(melding){
+  isAdmin=false;
+  currentAdmin=null;
+  updateAdminUi();
+  if(currentScreen.kind!=='page' || ADMIN_PAGES.includes(currentScreen.page)) nav('welcome');
+  showAppNotice(melding,'warn',8000);
+}
+
+function cloudDataIsLeeg(data){
+  return !data || typeof data!=='object' || !Object.keys(data).length;
+}
+function heeftLokaleData(){
+  try{
+    const r = localStorage.getItem(SK);
+    return !!r && !cloudDataIsLeeg(JSON.parse(r));
+  }catch(e){ return false; }
+}
+async function laadCloud(){
+  if(!cloudClient) return false;
+  try{
+    const {data,error} = await cloudClient.from('app_state').select('data,version').eq('id',1).maybeSingle();
+    if(error || !data) throw error || new Error('geen gegevens');
+    cloudVersion = data.version;
+    cloudConflict = false;
+    cloudLeeg = cloudDataIsLeeg(data.data);
+    const wacht = wachtendeVersie();
+    if(wacht!=null){
+      // Er staat lokaal nog een wijziging die niet online kwam: niet overschrijven.
+      if(!isAdmin) return true;
+      wisWachtend();
+      if(cloudLeeg || data.version===wacht){
+        await pushCloud();
+        cloudLeeg = false;
+      } else {
+        cloudConflict = true;
+        meldCloudConflict();
+      }
+      return true;
+    }
+    if(!cloudLeeg){
+      // Financiën staan alleen lokaal: de eigen lokale financiën blijven behouden.
+      const lokaal = JSON.parse(localStorage.getItem(SK)||'{}');
+      const nieuw = {...data.data};
+      if(lokaal.finance) nieuw.finance = lokaal.finance; else delete nieuw.finance;
+      localStorage.setItem(SK, JSON.stringify(nieuw));
+    } else if(isAdmin && heeftLokaleData()){
+      await pushCloud();
+      cloudLeeg = false;
+    }
+    return true;
+  }catch(e){
+    showAppNotice('De online uitslagen konden niet worden geladen. Je ziet de laatst opgeslagen versie.','warn',5000);
+    return false;
+  }
+}
+async function pushCloud(){
+  if(!cloudClient || !isAdmin || cloudVersion==null) return;
+  if(cloudConflict){
+    showAppNotice('Niet online opgeslagen: laad eerst de nieuwste versie (pagina verversen).','warn',6000);
+    return;
+  }
+  if(cloudBezig){ cloudOpnieuw = true; return; }
+  cloudBezig = true;
+  try{
+    do{
+      cloudOpnieuw = false;
+      const payload = JSON.parse(localStorage.getItem(SK)||'{}');
+      delete payload.finance;
+      delete payload.admins;
+      const {data,error} = await cloudClient.rpc('save_state',{expected_version:cloudVersion, new_data:payload});
+      if(error){
+        if(error.code==='40001' || /conflict/i.test(error.message||'')){
+          cloudConflict = true;
+          meldCloudConflict();
+        } else if(error.code==='42501' || /permission denied|jwt/i.test(error.message||'')){
+          markeerWachtend();
+          zetUitgelogd('Je bent niet meer ingelogd. Log opnieuw in; je wijziging wordt daarna alsnog online opgeslagen.');
+        } else {
+          showAppNotice('Online opslaan is mislukt: '+(error.message||'onbekende fout')+'. Probeer het opnieuw.','warn',6000);
+        }
+        return;
+      }
+      cloudVersion = data;
+      wisWachtend();
+    } while(cloudOpnieuw);
+  }catch(e){
+    showAppNotice('Online opslaan is mislukt. Controleer je internetverbinding.','warn',6000);
+  }finally{
+    cloudBezig = false;
+  }
+}
+async function meldCloudConflict(){
+  const laden = confirm('Een andere admin heeft intussen wijzigingen opgeslagen. Jouw laatste wijziging is daarom niet online opgeslagen.\n\nNieuwste versie laden? (Je laatste wijziging gaat dan verloren.)');
+  if(!laden) return;
+  const ok = await laadCloud();
+  if(ok) restoreScreen(currentScreen);
+}
+async function startCloud(){
+  if(!cloudClient) return;
+  try{
+    const {data} = await cloudClient.auth.getSession();
+    if(data?.session && await activeerAdminSessie(data.session)) updateAdminUi();
+  }catch(e){}
+  if(await laadCloud()) restoreScreen(currentScreen);
+}
+document.addEventListener('visibilitychange', async ()=>{
+  if(document.visibilityState!=='visible' || isAdmin || !cloudClient) return;
+  if(await laadCloud()) restoreScreen(currentScreen);
+});
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
 function isHoofdAdmin(){
   return !!currentAdmin && currentAdmin.rol==='hoofd';
 }
@@ -2156,96 +2281,64 @@ function updateAdminUi(){
   document.getElementById('admin-badge').textContent=isAdmin&&currentAdmin?`Ingelogd als: ${currentAdmin.naam}`:'Ingelogd als';
 }
 function openPin(){
-  const admins=getAdminen();
-  const select=document.getElementById('pin-admin-select');
-  select.innerHTML=`<option value="">Kies admin</option>${admins.map(a=>`<option value="${a.id}">${a.naam}</option>`).join('')}`;
-  select.value='';
   document.getElementById('pin-modal').classList.add('open');
   document.getElementById('pin-inp').value='';
   document.getElementById('pin-err').style.display='none';
-  setTimeout(()=>select.focus(),100);
+  setTimeout(()=>document.getElementById('pin-email').focus(),100);
 }
 function closePin(){document.getElementById('pin-modal').classList.remove('open');}
 function openAdminArea(){ if(isAdmin) nav('admin-home'); else openPin(); }
-function checkPin(){
-  const adminId=document.getElementById('pin-admin-select').value;
-  const code=String(document.getElementById('pin-inp').value||'').trim();
-  const admin=getAdminen().find(a=>a.id===adminId && a.code===code);
-  if(admin){
-    isAdmin=true;
-    currentAdmin={id:admin.id, naam:admin.naam, rol:admin.rol};
-    closePin();
-    updateAdminUi();
-    renderAdminHome();
-    nav('admin-home');
-  } else {
-    document.getElementById('pin-err').style.display='block';
-  }
+function toonPinFout(tekst){
+  const err=document.getElementById('pin-err');
+  err.textContent=tekst;
+  err.style.display='block';
 }
-function doLogout(){
+async function activeerAdminSessie(session){
+  const {data,error}=await cloudClient.from('admins').select('naam,rol').eq('user_id',session.user.id).maybeSingle();
+  if(error || !data) return false;
+  isAdmin=true;
+  currentAdmin={id:session.user.id, naam:data.naam, rol:data.rol};
+  return true;
+}
+async function checkPin(){
+  const email=String(document.getElementById('pin-email').value||'').trim();
+  const wachtwoord=String(document.getElementById('pin-inp').value||'');
+  if(!cloudClient){
+    toonPinFout('Inloggen is nu niet mogelijk. Controleer je internetverbinding en ververs de pagina.');
+    return;
+  }
+  if(!email || !wachtwoord){
+    toonPinFout('Vul je e-mailadres en wachtwoord in.');
+    return;
+  }
+  document.getElementById('pin-err').style.display='none';
+  const {data,error}=await cloudClient.auth.signInWithPassword({email, password:wachtwoord});
+  if(error || !data?.session){
+    toonPinFout('E-mailadres of wachtwoord klopt niet.');
+    return;
+  }
+  if(!(await activeerAdminSessie(data.session))){
+    await cloudClient.auth.signOut();
+    toonPinFout('Dit account heeft geen adminrechten.');
+    return;
+  }
+  document.getElementById('pin-inp').value='';
+  closePin();
+  await laadCloud();
+  updateAdminUi();
+  renderAdminHome();
+  nav('admin-home');
+}
+async function doLogout(){
   isAdmin=false;
   currentAdmin=null;
+  if(cloudClient){
+    try{ await cloudClient.auth.signOut(); }catch(e){}
+  }
   updateAdminUi();
   nav('welcome');
 }
 document.getElementById('pin-modal').onclick=closePin;
-
-function addAdminGebruiker(){
-  const naam=(document.getElementById('new-admin-naam')?.value||'').trim();
-  const code=String(document.getElementById('new-admin-code')?.value||'').trim();
-  const rol=(document.getElementById('new-admin-rol')?.value||'admin')==='hoofd'?'hoofd':'admin';
-  if(!naam || !code){
-    showAppNotice('Vul eerst naam en code in voor de nieuwe admin.','warn');
-    return;
-  }
-  const d=getData();
-  d.admins.push({id:uid(), naam, code, rol, actief:true});
-  saveData(d);
-  document.getElementById('new-admin-naam').value='';
-  document.getElementById('new-admin-code').value='';
-  document.getElementById('new-admin-rol').value='admin';
-  renderAdminHome();
-  showAppNotice(`Admin "${naam}" toegevoegd.`);
-}
-function updateAdminGebruiker(id, veld, waarde){
-  const d=getData();
-  const admin=d.admins.find(a=>a.id===id);
-  if(!admin) return;
-  if(veld==='naam') admin.naam=String(waarde||'').trim();
-  if(veld==='code') admin.code=String(waarde||'').trim();
-  if(veld==='rol'){
-    const wordtHoofd=waarde==='hoofd';
-    if(!wordtHoofd){
-      const andereHoofdAdmins=d.admins.filter(a=>a.id!==id && a.actief!==false && a.rol==='hoofd');
-      if(!andereHoofdAdmins.length){
-        renderAdminHome();
-        return;
-      }
-    }
-    admin.rol=wordtHoofd?'hoofd':'admin';
-  }
-  if(veld==='actief'){
-    const actief=!!waarde;
-    if(!actief){
-      const andereHoofdAdmins=d.admins.filter(a=>a.id!==id && a.actief!==false && a.rol==='hoofd');
-      if(admin.rol==='hoofd' && !andereHoofdAdmins.length){
-        renderAdminHome();
-        return;
-      }
-      if(currentAdmin?.id===id){
-        renderAdminHome();
-        return;
-      }
-    }
-    admin.actief=actief;
-  }
-  saveData(d);
-  if(currentAdmin?.id===id){
-    currentAdmin={id:admin.id, naam:admin.naam, rol:admin.rol};
-    updateAdminUi();
-  }
-  renderAdminHome();
-}
 
 function renderAdminHome(){
   const el=document.getElementById('admin-home-content');
@@ -2254,36 +2347,6 @@ function renderAdminHome(){
     nav('welcome',false);
     return;
   }
-  const admins=getData().admins;
-  const adminRows=isHoofdAdmin()?admins.map(a=>`
-    <div class="card" style="padding:14px 16px">
-      <div class="frow">
-        <div class="fg">
-          <label class="lbl">Naam</label>
-          <input value="${escapeHtmlAttr(a.naam)}" onblur="updateAdminGebruiker('${a.id}','naam',this.value)">
-        </div>
-        <div class="fg">
-          <label class="lbl">Code</label>
-          <input value="${escapeHtmlAttr(a.code)}" onblur="updateAdminGebruiker('${a.id}','code',this.value)">
-        </div>
-      </div>
-      <div class="frow">
-        <div class="fg">
-          <label class="lbl">Beheerrechten</label>
-          <select onchange="updateAdminGebruiker('${a.id}','rol',this.value)">
-            <option value="admin" ${a.rol==='admin'?'selected':''}>Standaard</option>
-            <option value="hoofd" ${a.rol==='hoofd'?'selected':''}>Volledig</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label class="lbl">Actief</label>
-          <select onchange="updateAdminGebruiker('${a.id}','actief',this.value==='1')">
-            <option value="1" ${a.actief!==false?'selected':''}>Ja</option>
-            <option value="0" ${a.actief===false?'selected':''}>Nee</option>
-          </select>
-        </div>
-      </div>
-    </div>`).join(''):'';
   el.innerHTML=`
     <div class="card">
       <div class="stitle">Admin Home</div>
@@ -7701,68 +7764,14 @@ function renderRoosterBeheer(){
 
 function renderAdminGegevensPane(){
   if(!isHoofdAdmin()){
-    return `<div class="card"><div class="stitle">Admin gegevens</div><div class="sub">Alleen bevoegde admin kan hier namen en persoonlijke codes beheren.</div></div>`;
+    return `<div class="card"><div class="stitle">Admin gegevens</div><div class="sub">Alleen een hoofdadmin kan admins beheren.</div></div>`;
   }
-  const admins=getData().admins;
-  const adminRows=admins.map(a=>`
-    <div class="card" style="padding:14px 16px">
-      <div class="frow">
-        <div class="fg">
-          <label class="lbl">Naam</label>
-          <input value="${escapeHtmlAttr(a.naam)}" onblur="updateAdminGebruiker('${a.id}','naam',this.value)">
-        </div>
-        <div class="fg">
-          <label class="lbl">Code</label>
-          <input value="${escapeHtmlAttr(a.code)}" onblur="updateAdminGebruiker('${a.id}','code',this.value)">
-        </div>
-      </div>
-      <div class="frow">
-        <div class="fg">
-          <label class="lbl">Beheerrechten</label>
-          <select onchange="updateAdminGebruiker('${a.id}','rol',this.value)">
-            <option value="admin" ${a.rol==='admin'?'selected':''}>Standaard</option>
-            <option value="hoofd" ${a.rol==='hoofd'?'selected':''}>Volledig</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label class="lbl">Actief</label>
-          <select onchange="updateAdminGebruiker('${a.id}','actief',this.value==='1')">
-            <option value="1" ${a.actief!==false?'selected':''}>Ja</option>
-            <option value="0" ${a.actief===false?'selected':''}>Nee</option>
-          </select>
-        </div>
-      </div>
-    </div>`).join('');
   return `<div class="card" style="margin-bottom:16px">
       <button class="btn btn-gh btn-sm inline-back" style="margin-bottom:14px" onclick="openBeheerView('home')">← Terug naar beheer</button>
       <div class="stitle">Admin gegevens</div>
-      <div class="sub" style="margin-bottom:12px">Alleen bevoegde admin kan hier namen en persoonlijke codes beheren.</div>
-      ${adminRows}
-      <div class="card" style="border-style:dashed">
-        <div class="stitle">Nieuwe Admin</div>
-        <div class="frow">
-          <div class="fg">
-            <label class="lbl">Naam</label>
-            <input id="new-admin-naam" placeholder="Bijvoorbeeld Jan de Vries">
-          </div>
-          <div class="fg">
-            <label class="lbl">Code</label>
-            <input id="new-admin-code" placeholder="Persoonlijke code">
-          </div>
-        </div>
-        <div class="frow">
-          <div class="fg">
-            <label class="lbl">Beheerrechten</label>
-            <select id="new-admin-rol">
-              <option value="admin">Standaard</option>
-              <option value="hoofd">Volledig</option>
-            </select>
-          </div>
-          <div class="fg" style="display:flex;align-items:flex-end">
-            <button class="btn btn-g" onclick="addAdminGebruiker()">Admin toevoegen</button>
-          </div>
-        </div>
-      </div>
+      <div class="sub" style="margin-bottom:12px">Admins loggen in met e-mailadres en wachtwoord. Je beheert ze in Supabase: nieuwe admins aanmaken, wachtwoorden resetten of toegang intrekken.</div>
+      <div class="sub" style="margin-bottom:12px">Ingelogd als ${escapeHtml(currentAdmin?.naam||'Admin')}.</div>
+      <a class="btn btn-g" href="https://supabase.com/dashboard/project/nvputjtfxwefeowstoxv/auth/users" target="_blank" rel="noopener">Admins beheren in Supabase</a>
     </div>`;
 }
 
@@ -12162,6 +12171,7 @@ window.addEventListener('resize', ()=>{ setViewportHeight(); syncResponsiveShell
 window.addEventListener('orientationchange', ()=>{ setViewportHeight(); syncResponsiveShell(); });
 syncWelcomeLogo();
 nav('welcome');
+startCloud();
 </script>
 <script src="./lib/finance-core.js"></script>
 <script src="./lib/finance-series.js"></script>
