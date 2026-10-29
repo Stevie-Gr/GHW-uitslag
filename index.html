@@ -917,7 +917,10 @@ body[data-page="nieuws"] .topbar-title{color:var(--accent-news)}
   line-height:1.7;
 }
 .nieuws-detail-hero{
+  position:relative;
   width:100%;
+  aspect-ratio:16 / 9;
+  max-height:420px;
   border-radius:18px;
   overflow:hidden;
   border:1px solid rgba(255,255,255,.08);
@@ -925,10 +928,20 @@ body[data-page="nieuws"] .topbar-title{color:var(--accent-news)}
   background:linear-gradient(145deg, rgba(106,212,190,.14), rgba(255,255,255,.03));
 }
 .nieuws-detail-hero img{
+  position:relative;
   width:100%;
-  max-height:420px;
-  object-fit:cover;
+  height:100%;
+  object-fit:contain;
   display:block;
+}
+/* Vervaagde kopie vult de ruimte naast de foto op brede schermen */
+.nieuws-detail-hero img.nieuws-hero-bg{
+  position:absolute;
+  inset:-8%;
+  width:116%;
+  height:116%;
+  object-fit:cover;
+  filter:blur(24px) brightness(.55);
 }
 .nieuws-body{
   color:#e4edf5;
@@ -10736,7 +10749,7 @@ function renderNieuwsPlaceholder(label='Geen foto'){
 function renderNieuwsPreviewCard(item){
   return `
     <div class="card">
-      ${item.foto?`<div class="nieuws-detail-hero"><img src="${item.foto}" alt="${escapeHtmlAttr(item.titel||'Nieuws foto')}"></div>`:''}
+      ${item.foto?`<div class="nieuws-detail-hero"><img class="nieuws-hero-bg" src="${item.foto}" alt="" aria-hidden="true"><img src="${item.foto}" alt="${escapeHtmlAttr(item.titel||'Nieuws foto')}"></div>`:''}
       <div class="welcome-news-kicker">Nieuws preview</div>
       <h2 class="nieuws-card-title">${escapeHtml(item.titel||'Nieuw artikel')}</h2>
       <div class="welcome-news-meta" style="margin-bottom:12px">${getNieuwsMetaHtml(item,true)||'Nog geen datum of auteur ingevuld'}</div>
@@ -11076,7 +11089,7 @@ function renderNieuws(){
       <div class="nieuws-layout">
         <div class="card">
           <button class="btn btn-gh btn-sm inline-back" style="margin-bottom:14px" onclick="closeNieuwsDetail()">Terug naar nieuws</button>
-          ${detail.foto?`<div class="nieuws-detail-hero"><img src="${detail.foto}" alt="${escapeHtmlAttr(detail.titel)}"></div>`:''}
+          ${detail.foto?`<div class="nieuws-detail-hero"><img class="nieuws-hero-bg" src="${detail.foto}" alt="" aria-hidden="true"><img src="${detail.foto}" alt="${escapeHtmlAttr(detail.titel)}"></div>`:''}
           <div class="welcome-news-kicker">Nieuwsartikel</div>
           <h1 class="welcome-news-title" style="margin-bottom:10px">${escapeHtml(detail.titel)}</h1>
           <div class="welcome-news-meta" style="margin-bottom:16px">${getNieuwsMetaHtml(detail)||''}</div>
