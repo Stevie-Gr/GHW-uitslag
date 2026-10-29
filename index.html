@@ -140,6 +140,11 @@ select option{background:#111;color:#fff}
 .app-notice-success{background:rgba(110,196,168,.14);border-color:rgba(110,196,168,.28);color:#dff7ee}
 .app-notice-error{background:rgba(217,106,111,.12);border-color:rgba(217,106,111,.28);color:#ffd7da}
 .app-notice-warn{background:rgba(216,171,99,.12);border-color:rgba(216,171,99,.28);color:#ffe6bc}
+.cloud-status{display:none;position:fixed;right:18px;bottom:18px;z-index:60;max-width:min(380px,calc(100vw - 36px));padding:10px 14px;border-radius:12px;border:1px solid var(--border);font-size:13px;font-weight:700;line-height:1.4;box-shadow:0 10px 24px rgba(0,0,0,.35);align-items:center;gap:10px}
+.cloud-status.show{display:flex}
+.cloud-status-ok{background:#123328;border-color:rgba(110,196,168,.45);color:#dff7ee}
+.cloud-status-wachtend{background:#3a2c12;border-color:rgba(216,171,99,.55);color:#ffe6bc}
+.cloud-status button{flex:none;border:0;border-radius:8px;padding:6px 10px;background:#ffe6bc;color:#3a2c12;font:inherit;font-size:12px;cursor:pointer}
 .empty{text-align:center;padding:40px 20px;color:#333}
 .empty-ico{font-size:44px;margin-bottom:10px}
 /* Koppel/solo boxes */
@@ -1812,6 +1817,7 @@ body.mobile-nav-open .sidebar-overlay{
       <span class="topbar-title" id="topbar-title"></span>
     </div>
     <div class="app-notice" id="app-notice"></div>
+    <div class="cloud-status" id="cloud-status" role="status" aria-live="polite"></div>
     <div class="page">
       <div class="pv active" id="pv-welcome">
         <div class="welcome-app">
@@ -2157,6 +2163,8 @@ function getData() {
 }
 function saveData(d){
   localStorage.setItem(SK,JSON.stringify(ensureAdminData(d)));
+  // Tot de server de wijziging bevestigt, geldt hij als "nog niet online" en wordt hij niet overschreven.
+  if(isAdmin || adminGeweest) markeerWachtend();
   pushCloud();
   if(document.getElementById('pv-welcome')?.classList.contains('active')){
     renderWelcomeDashboard();
@@ -2355,6 +2363,11 @@ let cloudOpnieuw = false;
 let cloudConflict = false;
 // Versie waarop een nog niet online opgeslagen wijziging is gebaseerd (bijv. na verlopen sessie).
 const SK_WACHTEND = SK+'_cloud_wachtend';
+// Online versie waar de lokale gegevens op gebaseerd zijn; nodig om bij een conflict samen te voegen.
+const SK_BASIS = SK+'_cloud_basis';
+// Blijft waar na een verlopen sessie, zodat wijzigingen daarna niet stil verloren gaan.
+let adminGeweest = false;
+let cloudOpnieuwTimer = null;
 try{
   if(window.supabase) cloudClient = window.supabase.createClient(CLOUD_URL, CLOUD_KEY);
 }catch(e){ cloudClient = null; }
@@ -2371,10 +2384,98 @@ function wachtendeVersie(){
   }catch(e){ return null; }
 }
 function markeerWachtend(){
-  if(wachtendeVersie()==null) localStorage.setItem(SK_WACHTEND, String(cloudVersion));
+  if(wachtendeVersie()==null) localStorage.setItem(SK_WACHTEND, String(cloudVersion ?? -1));
 }
 function wisWachtend(){
   localStorage.removeItem(SK_WACHTEND);
+}
+function zonderLokaleDelen(d){
+  const p = {...(d||{})};
+  delete p.finance;
+  delete p.admins;
+  return p;
+}
+function bewaarBasis(data){
+  try{ localStorage.setItem(SK_BASIS, JSON.stringify(zonderLokaleDelen(data))); }catch(e){}
+}
+function leesBasis(){
+  try{
+    const r = localStorage.getItem(SK_BASIS);
+    return r ? JSON.parse(r) : null;
+  }catch(e){ return null; }
+}
+// JSON met gesorteerde sleutels: de database zet sleutels in een andere volgorde dan de app.
+function vasteJson(v){
+  if(Array.isArray(v)) return '['+v.map(vasteJson).join(',')+']';
+  if(v && typeof v==='object') return '{'+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+vasteJson(v[k])).join(',')+'}';
+  return JSON.stringify(v);
+}
+// Drieweg-samenvoegen per onderdeel (op id): wat hier sinds de basis is gewijzigd wint,
+// de rest komt uit de online versie. Zo blijven wijzigingen van beide kanten behouden.
+function voegLijstSamen(b, l, r){
+  const metId = a=>a.every(x=>x && typeof x==='object' && x.id!=null);
+  if(!metId(b) || !metId(l) || !metId(r)) return vasteJson(l)!==vasteJson(b) ? l : r;
+  const B = new Map(b.map(x=>[x.id,x])), L = new Map(l.map(x=>[x.id,x])), R = new Map(r.map(x=>[x.id,x]));
+  const kies = id=>{
+    const bi = B.get(id), li = L.get(id), ri = R.get(id);
+    if(vasteJson(li)===vasteJson(bi)) return ri;
+    // Hier verwijderd: weg, tenzij het online intussen is aangepast.
+    if(li===undefined) return vasteJson(ri)!==vasteJson(bi) ? ri : undefined;
+    return li;
+  };
+  const uit = [];
+  l.forEach(x=>{ const v = kies(x.id); if(v!==undefined) uit.push(v); });
+  r.forEach(x=>{ if(!L.has(x.id)){ const v = kies(x.id); if(v!==undefined) uit.push(v); } });
+  return uit;
+}
+function voegSamen(basis, lokaal, online){
+  const norm = x=>zonderLokaleDelen(ensureAdminData(JSON.parse(JSON.stringify(x||{}))));
+  const B = norm(basis), L = norm(lokaal), R = norm(online);
+  const uit = {};
+  new Set([...Object.keys(B), ...Object.keys(L), ...Object.keys(R)]).forEach(k=>{
+    const b = B[k], l = L[k], r = R[k];
+    if(Array.isArray(l) && Array.isArray(r) && (b===undefined || Array.isArray(b))){
+      uit[k] = voegLijstSamen(b||[], l, r);
+    } else {
+      const w = vasteJson(l)!==vasteJson(b) ? l : r;
+      if(w!==undefined) uit[k] = w;
+    }
+  });
+  return uit;
+}
+// Lokale wijzigingen over de nieuwste online versie heen leggen. Geeft false als er geen basis is.
+function voegOnlineSamen(online){
+  const basis = leesBasis();
+  if(!basis) return false;
+  const lokaal = JSON.parse(localStorage.getItem(SK)||'{}');
+  const nieuw = voegSamen(basis, lokaal, online.data||{});
+  if(lokaal.finance) nieuw.finance = lokaal.finance;
+  localStorage.setItem(SK, JSON.stringify(nieuw));
+  bewaarBasis(online.data||{});
+  cloudVersion = online.version;
+  localStorage.setItem(SK_WACHTEND, String(cloudVersion));
+  return true;
+}
+function toonCloudStatus(staat){
+  const el = document.getElementById('cloud-status');
+  if(!el) return;
+  clearTimeout(el._timer);
+  if(staat==='ok'){
+    el.className = 'cloud-status cloud-status-ok show';
+    el.textContent = '✓ Online opgeslagen';
+    el._timer = setTimeout(()=>{ el.className = 'cloud-status'; }, 2500);
+  } else if(staat==='wachtend'){
+    el.className = 'cloud-status cloud-status-wachtend show';
+    el.innerHTML = isAdmin
+      ? '<span>Wijziging nog niet online opgeslagen. Wordt opnieuw geprobeerd…</span><button type="button" onclick="pushCloud()">Nu proberen</button>'
+      : '<span>Wijziging nog niet online opgeslagen. Log opnieuw in om hem op te slaan.</span><button type="button" onclick="openPin()">Inloggen</button>';
+  } else {
+    el.className = 'cloud-status';
+  }
+}
+function planCloudOpnieuw(){
+  if(cloudOpnieuwTimer) return;
+  cloudOpnieuwTimer = setTimeout(()=>{ cloudOpnieuwTimer = null; if(isAdmin && wachtendeVersie()!=null) pushCloud(); }, 20000);
 }
 function zetUitgelogd(melding){
   isAdmin=false;
@@ -2404,9 +2505,9 @@ async function laadCloud(){
     const wacht = wachtendeVersie();
     if(wacht!=null){
       // Er staat lokaal nog een wijziging die niet online kwam: niet overschrijven.
+      toonCloudStatus('wachtend');
       if(!isAdmin) return true;
-      wisWachtend();
-      if(cloudLeeg || data.version===wacht){
+      if(cloudLeeg || data.version===wacht || voegOnlineSamen(data)){
         await pushCloud();
         cloudLeeg = false;
       } else {
@@ -2421,6 +2522,7 @@ async function laadCloud(){
       const nieuw = {...data.data};
       if(lokaal.finance) nieuw.finance = lokaal.finance; else delete nieuw.finance;
       localStorage.setItem(SK, JSON.stringify(nieuw));
+      bewaarBasis(data.data);
     } else if(isAdmin && heeftLokaleData()){
       await pushCloud();
       cloudLeeg = false;
@@ -2432,37 +2534,57 @@ async function laadCloud(){
   }
 }
 async function pushCloud(){
-  if(!cloudClient || !isAdmin || cloudVersion==null) return;
+  if(!cloudClient) return;
+  if(!isAdmin || cloudVersion==null){
+    if(wachtendeVersie()!=null) toonCloudStatus('wachtend');
+    return;
+  }
   if(cloudConflict){
+    toonCloudStatus('wachtend');
     showAppNotice('Niet online opgeslagen: laad eerst de nieuwste versie (pagina verversen).','warn',6000);
     return;
   }
   if(cloudBezig){ cloudOpnieuw = true; return; }
   cloudBezig = true;
+  let samengevoegd = 0;
   try{
     do{
       cloudOpnieuw = false;
-      const payload = JSON.parse(localStorage.getItem(SK)||'{}');
-      delete payload.finance;
-      delete payload.admins;
+      const payload = zonderLokaleDelen(JSON.parse(localStorage.getItem(SK)||'{}'));
       const {data,error} = await cloudClient.rpc('save_state',{expected_version:cloudVersion, new_data:payload});
       if(error){
         if(error.code==='40001' || /conflict/i.test(error.message||'')){
+          // Iemand anders sloeg intussen op: nieuwste versie ophalen, samenvoegen en opnieuw proberen.
+          if(samengevoegd<3){
+            const online = await cloudClient.from('app_state').select('data,version').eq('id',1).maybeSingle();
+            if(!online.error && online.data && voegOnlineSamen(online.data)){
+              samengevoegd++;
+              cloudOpnieuw = true;
+              continue;
+            }
+          }
           cloudConflict = true;
+          toonCloudStatus('wachtend');
           meldCloudConflict();
         } else if(error.code==='42501' || /permission denied|jwt/i.test(error.message||'')){
-          markeerWachtend();
           zetUitgelogd('Je bent niet meer ingelogd. Log opnieuw in; je wijziging wordt daarna alsnog online opgeslagen.');
+          toonCloudStatus('wachtend');
         } else {
-          showAppNotice('Online opslaan is mislukt: '+(error.message||'onbekende fout')+'. Probeer het opnieuw.','warn',6000);
+          toonCloudStatus('wachtend');
+          planCloudOpnieuw();
         }
         return;
       }
       cloudVersion = data;
-      wisWachtend();
+      bewaarBasis(payload);
+      // Kwam er tijdens het opslaan nog een wijziging bij, dan is die op deze versie gebaseerd.
+      if(cloudOpnieuw) localStorage.setItem(SK_WACHTEND, String(cloudVersion)); else wisWachtend();
     } while(cloudOpnieuw);
+    toonCloudStatus('ok');
+    if(samengevoegd) restoreScreen(currentScreen);
   }catch(e){
-    showAppNotice('Online opslaan is mislukt. Controleer je internetverbinding.','warn',6000);
+    toonCloudStatus('wachtend');
+    planCloudOpnieuw();
   }finally{
     cloudBezig = false;
   }
@@ -2470,6 +2592,8 @@ async function pushCloud(){
 async function meldCloudConflict(){
   const laden = confirm('Een andere admin heeft intussen wijzigingen opgeslagen. Jouw laatste wijziging is daarom niet online opgeslagen.\n\nNieuwste versie laden? (Je laatste wijziging gaat dan verloren.)');
   if(!laden) return;
+  wisWachtend();
+  toonCloudStatus('');
   const ok = await laadCloud();
   if(ok) restoreScreen(currentScreen);
 }
@@ -2523,8 +2647,15 @@ async function startCloud(){
   verhuisNieuwsFotos();
 }
 document.addEventListener('visibilitychange', async ()=>{
-  if(document.visibilityState!=='visible' || isAdmin || !cloudClient) return;
+  if(document.visibilityState!=='visible' || !cloudClient) return;
+  if(isAdmin){
+    if(wachtendeVersie()!=null) pushCloud();
+    return;
+  }
   if(await laadCloud()) restoreScreen(currentScreen);
+});
+window.addEventListener('online', ()=>{
+  if(isAdmin && wachtendeVersie()!=null) pushCloud();
 });
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
@@ -2555,6 +2686,7 @@ async function activeerAdminSessie(session){
   const {data,error}=await cloudClient.from('admins').select('naam,rol').eq('user_id',session.user.id).maybeSingle();
   if(error || !data) return false;
   isAdmin=true;
+  adminGeweest=true;
   currentAdmin={id:session.user.id, naam:data.naam, rol:data.rol};
   return true;
 }
@@ -2589,12 +2721,20 @@ async function checkPin(){
   verhuisNieuwsFotos();
 }
 async function doLogout(){
+  const wachtend = wachtendeVersie()!=null;
+  if(wachtend && !confirm('Er is nog een wijziging die niet online is opgeslagen.\n\nToch uitloggen? Die wijziging gaat dan verloren.')) return;
   isAdmin=false;
+  adminGeweest=false;
   currentAdmin=null;
   if(cloudClient){
     try{ await cloudClient.auth.signOut(); }catch(e){}
   }
   updateAdminUi();
+  if(wachtend){
+    wisWachtend();
+    toonCloudStatus('');
+    await laadCloud();
+  }
   nav('welcome');
 }
 document.getElementById('pin-modal').onclick=closePin;
