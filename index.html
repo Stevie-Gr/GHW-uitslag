@@ -2042,14 +2042,14 @@ body.mobile-nav-open .sidebar-overlay{
     </div>
     <div class="sb-nav">
       <div class="sb-sec">Algemeen</div>
-      <button class="sb-btn on" onclick="nav('welcome')" id="nav-welcome"><span class="sb-icon">🏠</span>Home</button>
-      <button class="sb-btn" onclick="nav('nieuws')" id="nav-nieuws"><span class="sb-icon">📰</span>Nieuws</button>
-      <div class="sb-sec" style="margin-top:4px;padding-top:4px">Uitslagen</div>
-      <button class="sb-btn" onclick="nav('los')" id="nav-los" style="padding-left:20px"><span class="sb-icon">🎣</span>Losse wedstrijden</button>
-      <button class="sb-btn" onclick="nav('serie')" id="nav-serie" style="padding-left:20px"><span class="sb-icon">🏆</span>Serie wedstrijden</button>
-      <button class="sb-btn" onclick="nav('rooster')" id="nav-rooster"><span class="sb-icon">🗓️</span>Wedstrijd rooster</button>
-      <button class="sb-btn" onclick="nav('visweek')" id="nav-visweek" style="padding-left:20px">Visweek</button>
+      <button class="sb-btn on" onclick="nav('welcome')" id="nav-welcome">Home</button>
+      <button class="sb-btn" onclick="nav('rooster')" id="nav-rooster">Wedstrijdagenda</button>
+      <button class="sb-btn" onclick="nav('nieuws')" id="nav-nieuws">Nieuws</button>
+      <div class="sb-sec">Uitslagen</div>
+      <button class="sb-btn" onclick="nav('los')" id="nav-los">Losse wedstrijden</button>
+      <button class="sb-btn" onclick="nav('serie')" id="nav-serie">Serie wedstrijden</button>
       <button class="sb-btn" onclick="nav('kanjer')" id="nav-kanjer">Kanjer competitie</button>
+      <button class="sb-btn" onclick="nav('visweek')" id="nav-visweek">Visweek</button>
       <div id="admin-nav" style="display:none">
         <div class="sb-sec">Admin</div>
         <button class="sb-btn" onclick="nav('invoer')" id="nav-invoer">Uitslag invoeren</button>
@@ -2138,7 +2138,7 @@ body.mobile-nav-open .sidebar-overlay{
       </div>
 
       <div class="pv pv-sfeer" id="pv-rooster">
-        <header class="pagina-kop"><div class="pagina-kop-inhoud"><div class="pagina-kop-kicker">Agenda</div><h1>Wedstrijdrooster</h1><p>Alle komende wedstrijden en bijzondere vermeldingen tot het einde van het jaar.</p></div></header>
+        <header class="pagina-kop"><div class="pagina-kop-inhoud"><div class="pagina-kop-kicker">Agenda</div><h1>Wedstrijdagenda</h1><p>Alle komende wedstrijden en bijzondere vermeldingen tot het einde van het jaar.</p></div></header>
         <div id="rooster-content"></div>
       </div>
 
@@ -2351,7 +2351,10 @@ function setCurrentScreen(screen, addToHistory=true){
   }
   updateViewportMode(currentScreen);
   updateBackButton();
-  // Een nieuw scherm begint altijd bovenaan (de body scrolt, niet het venster).
+  scrollPaginaNaarBoven();
+}
+// Een nieuw scherm begint altijd bovenaan (de body scrolt, niet het venster).
+function scrollPaginaNaarBoven(){
   document.body.scrollTop=0;
   document.documentElement.scrollTop=0;
 }
@@ -2553,7 +2556,7 @@ function syncWelcomeLogo(){
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
-const titles={welcome:'',nieuws:'Nieuws',los:'Losse Wedstrijden',serie:'Serie Wedstrijden',visweek:'Visweek',rooster:'Wedstrijd Rooster',kanjer:'Kanjer Competitie',punten:'Puntenstand','admin-home':'Admin Home',invoer:'Uitslag invoeren','serie-invoer':'Serie uitslag invoeren','visweek-beheer':'Visweek invoeren',import:'Importeer Excel',backup:'Backup & Herstel',beheer:'Beheer'};
+const titles={welcome:'',nieuws:'Nieuws',los:'Losse Wedstrijden',serie:'Serie Wedstrijden',visweek:'Visweek',rooster:'Wedstrijdagenda',kanjer:'Kanjer Competitie',punten:'Puntenstand','admin-home':'Admin Home',invoer:'Uitslag invoeren','serie-invoer':'Serie uitslag invoeren','visweek-beheer':'Visweek invoeren',import:'Importeer Excel',backup:'Backup & Herstel',beheer:'Beheer'};
 let appNoticeTimer=null;
 function showAppNotice(message,type='success',duration=2600){
   const el=document.getElementById('app-notice');
@@ -2610,6 +2613,7 @@ function nav(p,addToHistory=true){
   if(p==='backup')renderBackup();
   if(p==='beheer')renderBeheer();
   document.body.setAttribute('data-page', p);
+  scrollPaginaNaarBoven();
 }
 
 // ── Online opslag (Supabase) ──────────────────────────────────────────────────
@@ -3033,7 +3037,7 @@ function renderAdminHome(){
       <button class="home-card" onclick="nav('beheer')">
         <span class="home-card-overline">Admin taak</span>
         <strong>Beheer</strong>
-        <span>Open import, wedstrijdrooster, nieuws, vissers, admingegevens en ingevoerde uitslagen vanuit één centrale plek.</span>
+        <span>Open import, wedstrijdagenda, nieuws, vissers, admingegevens en ingevoerde uitslagen vanuit één centrale plek.</span>
       </button>
       ${isAdmin?`<button class="home-card" onclick="nav('backup')">
         <span class="home-card-overline">Admin taak</span>
@@ -3698,7 +3702,7 @@ function renderRooster(){
   if(!host) return;
   const items=getRoosterOverzichtItems(d);
   if(!items.length){
-    host.innerHTML=`<div class="empty"><div class="empty-ico">🗓️</div>Geen komende items in het rooster.</div>`;
+    host.innerHTML=`<div class="empty"><div class="empty-ico">🗓️</div>Geen komende items in de agenda.</div>`;
     return;
   }
   let huidigeMaand='';
@@ -3829,7 +3833,7 @@ function renderWelcomeDashboard(){
               <div class="wh-meta">${escapeHtml([item.locatie,item.verzamelen?`loting ${item.verzamelen}`:''].filter(Boolean).join(' · '))}</div>
             </div>
           </div>`).join('')}
-      `:`<div class="wh-meta">Er staan geen komende wedstrijden in het rooster.</div>`}
+      `:`<div class="wh-meta">Er staan geen komende wedstrijden in de agenda.</div>`}
       <button class="wh-link" onclick="nav('rooster')">Bekijk volledige agenda <span aria-hidden="true">→</span></button>
     </section>`;
 
@@ -6860,6 +6864,8 @@ function renderBeheer(){
 }
 
 function openBeheerView(view, serieId=null){
+  // Alleen bij een ander beheerscherm naar boven; opslaan of verwijderen in een lijst houdt de plek vast
+  const anderScherm=view!==beheerView || serieId!==beheerSerieId;
   beheerView=view;
   beheerSerieId=serieId;
   if(view!=='rooster') beheerRoosterEditId=null;
@@ -6874,6 +6880,7 @@ function openBeheerView(view, serieId=null){
     nieuwsCropDirty=false;
   }
   renderBeheer();
+  if(anderScherm) scrollPaginaNaarBoven();
 }
 
 function getLosseWedstrijden(d){
@@ -6970,10 +6977,11 @@ function updateRoosterWedstrijdMeta(wId){
 function openRoosterItemBewerken(itemId){
   beheerRoosterEditId=itemId;
   openBeheerView('rooster');
+  scrollPaginaNaarBoven();
 }
 
 function verwijderRoosterItem(itemId){
-  if(!confirm('Weet je zeker dat je dit rooster-item wilt verwijderen?')) return;
+  if(!confirm('Weet je zeker dat je dit agenda-item wilt verwijderen?')) return;
   const d=getData();
   d.roosterItems=(d.roosterItems||[]).filter(item=>item.id!==itemId);
   saveData(d);
@@ -7010,7 +7018,7 @@ function saveRoosterItem(){
     zichtbaar:true
   };
   if(!payload.datum){
-    alert('Vul minimaal een datum in voor dit rooster-item.');
+    alert('Vul minimaal een datum in voor dit agenda-item.');
     return;
   }
   if(payload.type==='wedstrijd'){
@@ -7028,7 +7036,7 @@ function saveRoosterItem(){
       return;
     }
   } else if(!payload.titel){
-    alert('Vul minimaal een titel in voor dit rooster-item.');
+    alert('Vul minimaal een titel in voor dit agenda-item.');
     return;
   }
   const items=d.roosterItems||[];
@@ -7244,7 +7252,7 @@ function renderRoosterBeheer(){
         </div>
       </div>
       ${item.opmerking?`<div class="info" style="margin:12px 0 0">${escapeHtml(item.opmerking)}</div>`:''}
-    </div>`).join('') || '<div class="empty"><div class="empty-ico">W</div>Nog geen geplande wedstrijden in het rooster.</div>';
+    </div>`).join('') || '<div class="empty"><div class="empty-ico">W</div>Nog geen geplande wedstrijden in de agenda.</div>';
 
   const extraCards=sortRoosterItems(getRoosterPlanningItems(d).filter(item=>item.type!=='wedstrijd')).map(item=>{
     const meta=getRoosterItemTypeMeta(item.type);
@@ -7266,16 +7274,16 @@ function renderRoosterBeheer(){
         </div>
       </div>
     </div>`;
-  }).join('') || '<div class="empty"><div class="empty-ico">R</div>Nog geen extra rooster-items.</div>';
+  }).join('') || '<div class="empty"><div class="empty-ico">R</div>Nog geen extra agenda-items.</div>';
 
   setTimeout(syncRoosterBeheerForm,0);
   return `<div class="card" style="margin-bottom:16px">
       <button class="btn btn-gh btn-sm inline-back" style="margin-bottom:14px" onclick="openBeheerView('home')">Terug naar beheer</button>
-      <div class="stitle">Wedstrijd rooster</div>
+      <div class="stitle">Wedstrijdagenda</div>
       <div class="sub" style="margin-bottom:0">Plan hier zelf alle komende wedstrijden en bijzondere vermeldingen. Vanuit een geplande wedstrijd kun je later als admin de echte uitslaginvoer starten.</div>
     </div>
     <div class="card" style="margin-bottom:16px">
-      <div class="stitle" style="margin-bottom:12px">${editItem?'Rooster-item bewerken':'Nieuw rooster-item'}</div>
+      <div class="stitle" style="margin-bottom:12px">${editItem?'Agenda-item bewerken':'Nieuw agenda-item'}</div>
       <div class="frow">
         <div class="fg"><label class="lbl">Datum</label><input id="rooster-item-datum" type="date" value="${escapeHtmlAttr(editItem?.datum||'')}"></div>
         <div class="fg"><label class="lbl" id="rooster-item-titel-label">Titel</label><input id="rooster-item-titel" value="${escapeHtmlAttr(editItem?.titel||'')}" placeholder="Bijvoorbeeld Jaarvergadering"></div>
@@ -7315,7 +7323,7 @@ function renderRoosterBeheer(){
       ${wedstrijdCards}
     </div>
     <div class="card">
-      <div class="stitle" style="margin-bottom:12px">Extra rooster-items</div>
+      <div class="stitle" style="margin-bottom:12px">Extra agenda-items</div>
       <div class="sub" style="margin-bottom:12px">Gebruik deze lijst voor vergaderingen, mededelingen en uitzonderingen die niet als wedstrijd in de app staan.</div>
       ${extraCards}
     </div>`;
@@ -8866,8 +8874,9 @@ function getInvoerVakLetters(huidig=''){
   if(isGescheidenKoppelWedstrijd(w)) return ['A','B'];
   const bestaand=(invoerState.vakken||[]).map((v,i)=>getDisplayVakNaam(v,i));
   if(huidig) bestaand.push(huidig);
-  const hoogste=bestaand.reduce((max,l)=>Math.max(max,letters.indexOf(l)),-1);
-  return letters.slice(0,Math.min(letters.length,hoogste+2));
+  // Altijd A t/m E, want aan de waterkant kan bij elk vak begonnen worden
+  const hoogste=bestaand.reduce((max,l)=>Math.max(max,letters.indexOf(l)),4);
+  return letters.slice(0,hoogste+1);
 }
 
 function waterkantVeldEnter(event, volgendeId){
@@ -9484,11 +9493,11 @@ function renderGescheidenKoppelInvoerForm(w, d, comp, compLabel, lotingGroups, a
               </div>
               <div class="fg">
                 <label class="lbl">Stek</label>
-                <input id="gk-stek-${row.vid}" inputmode="numeric" value="${escapeHtmlAttr(row.stek)}" placeholder="Bijvoorbeeld 12">
+                <input id="gk-stek-${row.vid}" inputmode="numeric" value="${escapeHtmlAttr(row.stek)}">
               </div>
               <div class="fg">
                 <label class="lbl">Grammen</label>
-                <input id="gk-gram-${row.vid}" inputmode="decimal" value="${escapeHtmlAttr(row.gewicht)}" placeholder="Bijvoorbeeld 2450">
+                <input id="gk-gram-${row.vid}" inputmode="decimal" value="${escapeHtmlAttr(row.gewicht)}">
               </div>
             </div>
           </div>`).join('')}
@@ -9545,7 +9554,7 @@ function renderGescheidenKoppelInvoerForm(w, d, comp, compLabel, lotingGroups, a
       <div style="font-family:var(--font);font-size:28px;font-weight:900;margin-bottom:12px">${escapeHtml(activeRow.naam)}</div>
       <div class="fg">
         <label class="lbl">Stek</label>
-        <input id="waterkant-stek" inputmode="numeric" value="${escapeHtmlAttr(activeRow.stek)}" placeholder="Bijvoorbeeld 12">
+        <input id="waterkant-stek" inputmode="numeric" value="${escapeHtmlAttr(activeRow.stek)}">
       </div>
       <div class="fg">
         <label class="lbl">Vak</label>
@@ -9554,7 +9563,7 @@ function renderGescheidenKoppelInvoerForm(w, d, comp, compLabel, lotingGroups, a
       </div>
       <div class="fg">
         <label class="lbl">Grammen</label>
-        <input id="waterkant-gram" inputmode="decimal" value="${escapeHtmlAttr(activeRow.gewicht)}" placeholder="Bijvoorbeeld 2450">
+        <input id="waterkant-gram" inputmode="decimal" value="${escapeHtmlAttr(activeRow.gewicht)}">
       </div>
       <div id="waterkant-err" class="err" style="display:none"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -9684,11 +9693,11 @@ function renderInvoerForm(){
       <div class="inv-velden">
         <div>
           <label class="lbl">Stek</label>
-          <input id="waterkant-stek" inputmode="numeric" enterkeyhint="next" value="${escapeHtmlAttr(activeRow.stek)}" placeholder="12" onkeydown="waterkantVeldEnter(event,'waterkant-gram')">
+          <input id="waterkant-stek" inputmode="numeric" enterkeyhint="next" value="${escapeHtmlAttr(activeRow.stek)}" onkeydown="waterkantVeldEnter(event,'waterkant-gram')">
         </div>
         <div>
           <label class="lbl">Grammen</label>
-          <input id="waterkant-gram" inputmode="decimal" enterkeyhint="done" value="${escapeHtmlAttr(activeRow.gewicht)}" placeholder="2450" onkeydown="waterkantVeldEnter(event)">
+          <input id="waterkant-gram" inputmode="decimal" enterkeyhint="done" value="${escapeHtmlAttr(activeRow.gewicht)}" onkeydown="waterkantVeldEnter(event)">
         </div>
       </div>
       ${s.gebruiktVakken?`<div style="margin-top:12px">
@@ -9934,8 +9943,8 @@ function renderBWeds(){
       </button>
       <button class="home-card" onclick="openBeheerView('rooster')">
         <span class="home-card-overline">Beheer keuze</span>
-        <strong>Wedstrijd rooster</strong>
-        <span>Plan wedstrijden en extra rooster-items, en zet ze later om naar uitslaginvoer.</span>
+        <strong>Wedstrijdagenda</strong>
+        <span>Plan wedstrijden en extra agenda-items, en zet ze later om naar uitslaginvoer.</span>
       </button>
       <button class="home-card" onclick="openBeheerView('vissers')">
         <span class="home-card-overline">Beheer keuze</span>
@@ -10863,7 +10872,7 @@ renderBWeds = function(){
     intro.innerHTML=`
       <div class="stitle">Beheer</div>
       <div style="font-family:var(--font);font-size:30px;font-weight:900;margin-bottom:8px">Kies wat je wilt beheren</div>
-      <div class="sub" style="margin-bottom:0">Open hier alles wat onder beheer valt: import, rooster, nieuws, vissers, admingegevens en ingevoerde uitslagen.</div>`;
+      <div class="sub" style="margin-bottom:0">Open hier alles wat onder beheer valt: import, agenda, nieuws, vissers, admingegevens en ingevoerde uitslagen.</div>`;
   }
   if(!grid) return;
   grid.innerHTML=`
@@ -10874,7 +10883,7 @@ renderBWeds = function(){
     </button>
     <button class="home-card" onclick="openBeheerView('rooster')">
       <span class="home-card-overline">Beheer keuze</span>
-      <strong>Wedstrijd rooster</strong>
+      <strong>Wedstrijdagenda</strong>
       <span>Plan wedstrijden, vergaderingen en uitzonderingen voor het jaaroverzicht.</span>
     </button>
     <button class="home-card" onclick="openBeheerView('nieuws')">
