@@ -1789,6 +1789,163 @@ body.mobile-nav-open .sidebar-overlay{
   .visweek-switch .btn{flex:1 1 130px}
 }
 
+/* Publieke pagina's: kanaalkop, vervaagde sfeer en warme kaarten zoals de startpagina */
+.pv-sfeer{
+  position:relative;
+  isolation:isolate;
+  --card:rgba(18,28,40,.72);
+  --border:rgba(255,226,196,.10);
+}
+.pv-sfeer::before{
+  content:'';
+  position:absolute;
+  z-index:-1;
+  left:0;
+  right:0;
+  top:60px;
+  height:min(1000px,calc(100% - 40px));
+  border-radius:40px;
+  background:url('achtergrond-water.jpg') 70% 40%/cover no-repeat;
+  opacity:.5;
+  filter:blur(18px) saturate(1.2);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.5) 55%,transparent 100%);
+  mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.5) 55%,transparent 100%);
+  pointer-events:none;
+}
+.pagina-kop{
+  position:relative;
+  display:flex;
+  align-items:flex-end;
+  min-height:120px;
+  margin-bottom:18px;
+  padding:20px 26px;
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  background:#0b1822 url('achtergrond-water.jpg') 70% 45%/cover no-repeat;
+  box-shadow:0 12px 30px rgba(0,0,0,.26);
+}
+.pagina-kop::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,rgba(5,12,18,.86) 0%,rgba(5,12,18,.55) 50%,rgba(5,12,18,.1) 85%);
+}
+.pagina-kop-inhoud{position:relative;min-width:0}
+.pagina-kop-kicker{
+  color:var(--g);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  text-shadow:0 1px 8px rgba(0,0,0,.6);
+}
+.pagina-kop h1{
+  margin:4px 0 0;
+  font-family:var(--font);
+  font-size:34px;
+  font-weight:900;
+  line-height:1.05;
+  letter-spacing:.5px;
+  color:var(--text);
+  text-shadow:0 2px 12px rgba(0,0,0,.5);
+}
+.pagina-kop p{margin:6px 0 0;max-width:560px;color:#d0dde8;font-size:14px;line-height:1.5;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.pv-sfeer .card,
+.pv-sfeer .sbox,
+.pv-sfeer .home-card,
+.pv-sfeer [onclick^="showLosDetail"],
+.pv-sfeer [onclick^="showSerieWedDetail"]{
+  background:linear-gradient(180deg,rgba(24,34,48,.74),rgba(12,20,30,.86));
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  border-color:rgba(255,226,196,.10);
+  border-radius:16px!important;
+  box-shadow:inset 0 1px 0 rgba(255,228,200,.07),0 12px 30px rgba(0,0,0,.22);
+}
+.pv-sfeer [onclick^="showLosDetail"]:hover,
+.pv-sfeer [onclick^="showSerieWedDetail"]:hover{border-color:var(--g)!important}
+/* Cijferblokken: altijd naast elkaar op één compacte rij */
+.pv-sfeer .pgrid{display:flex;flex-wrap:nowrap;gap:10px;margin-bottom:16px}
+.pv-sfeer .sbox{flex:1 1 0;min-width:0;padding:12px 14px;text-align:left}
+.pv-sfeer .sbox .snum,.pv-sfeer .sbox .snum-b{font-size:26px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv-sfeer .sbox .slbl{margin-top:4px;font-size:10px;letter-spacing:.8px;line-height:1.25}
+/* Lijnicoontjes in één stijl */
+.ico{display:inline-block;width:1.05em;height:1.05em;vertical-align:-.16em;flex-shrink:0;color:var(--g);opacity:.9}
+.meta-rij{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+.meta-rij > span{display:inline-flex;align-items:center;gap:6px}
+/* Podium bovenaan een uitslag */
+.uitslag-podium{display:grid;grid-template-columns:1fr 1.12fr 1fr;align-items:end;gap:12px;margin-bottom:18px}
+.podium-plek{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap:6px;
+  padding:16px 12px;
+  border-radius:16px;
+  background:linear-gradient(180deg,rgba(24,34,48,.74),rgba(12,20,30,.86));
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,226,196,.10);
+  box-shadow:inset 0 1px 0 rgba(255,228,200,.07),0 12px 30px rgba(0,0,0,.22);
+}
+.podium-plek-1{order:2;padding-top:22px;padding-bottom:22px;border-color:rgba(245,200,66,.45)}
+.podium-plek-2{order:1}
+.podium-plek-3{order:3}
+.podium-rang{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:17px;font-weight:900}
+.podium-plek-1 .podium-rang{width:42px;height:42px;font-size:21px}
+.podium-naam{max-width:100%;font-weight:700;font-size:15px;line-height:1.25;overflow-wrap:anywhere}
+.podium-sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.podium-gewicht{font-family:var(--font);font-size:22px;font-weight:800;color:var(--g)}
+.podium-plek-1 .podium-gewicht{font-size:26px}
+.uitslag-kop{font-family:var(--font);font-size:18px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--b);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+/* Rooster: datumblok links, details in een nette rij */
+.rooster-rij{display:flex;gap:16px;align-items:flex-start}
+.rooster-tekst{min-width:0;flex:1}
+.rooster-titel{font-family:var(--font);font-size:22px;font-weight:700;line-height:1.1;margin:6px 0 2px}
+.rooster-tekst .wh-agenda-details{margin:12px 0 0}
+.rooster-maand{font-family:var(--font);font-size:22px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:22px 0 12px}
+.rooster-maand:first-child{margin-top:4px}
+/* Kanjer: namen in gewone letters, gemiddelde en deelnames klein eronder */
+.kanjer-naam{display:block;width:100%;padding:0;border:0;background:none;color:var(--text);font-family:inherit;font-weight:700;font-size:15px;line-height:1.25;text-transform:none;letter-spacing:0;text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.kanjer-naam:hover{color:var(--g)}
+.kanjer-sub{font-size:11px;color:var(--muted);margin-top:3px}
+/* Visweek tussenstand op telefoon: kaart per koppel */
+.visweek-stand-kaarten{display:none}
+.vw-kaart{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.vw-kaart:last-child{border-bottom:0}
+.vw-kaart.visweek-winner-row{background:rgba(224,179,95,.08)}
+.vw-kop{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center}
+.vw-naam{font-weight:700;font-size:14px;line-height:1.25;overflow-wrap:anywhere}
+.vw-totaal{text-align:right;white-space:nowrap}
+.vw-totaal strong{display:block;font-family:var(--font);font-size:18px;font-weight:800;color:var(--g);line-height:1.1}
+.vw-totaal span{font-size:11px;color:var(--muted)}
+.vw-dagen{display:flex;flex-wrap:wrap;gap:4px 12px;margin:8px 0 0 40px;font-size:11px;color:var(--muted)}
+.vw-dagen b{color:var(--text);font-weight:700}
+@media (max-width: 900px){
+  .pagina-kop{min-height:96px;padding:16px 18px;border-radius:16px;margin-bottom:14px}
+  .pagina-kop h1{font-size:27px}
+  .pagina-kop p{font-size:13px}
+  .pv-sfeer .pgrid{gap:8px}
+  .pv-sfeer .sbox{padding:10px 10px}
+  .pv-sfeer .sbox .snum,.pv-sfeer .sbox .snum-b{font-size:21px}
+  .pv-sfeer .sbox .slbl{font-size:9.5px;letter-spacing:.5px}
+  .uitslag-podium{gap:8px}
+  .uitslag-podium-vakken{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .podium-plek{padding:12px 6px;gap:4px}
+  .podium-plek-1{padding-top:16px;padding-bottom:16px}
+  .podium-naam{font-size:13px}
+  .podium-gewicht{font-size:17px}
+  .podium-plek-1 .podium-gewicht{font-size:20px}
+  .podium-rang{width:28px;height:28px;font-size:14px}
+  .podium-plek-1 .podium-rang{width:34px;height:34px;font-size:17px}
+  .rooster-rij{gap:12px}
+  .rooster-titel{font-size:19px}
+  .visweek-stand-tabel{display:none}
+  .visweek-stand-kaarten{display:block}
+}
 </style>
 <link rel="stylesheet" href="./lib/finance.css">
 </head>
@@ -1885,30 +2042,36 @@ body.mobile-nav-open .sidebar-overlay{
         <div id="admin-home-content"></div>
       </div>
 
-      <div class="pv" id="pv-los">
+      <div class="pv pv-sfeer" id="pv-los">
+        <header class="pagina-kop"><div class="pagina-kop-inhoud"><div class="pagina-kop-kicker">Uitslagen</div><h1>Losse wedstrijden</h1><p>Alle losse en koppelwedstrijden, nieuwste bovenaan.</p></div></header>
         <div id="los-list"></div>
         <div id="los-detail" style="display:none"></div>
       </div>
 
-      <div class="pv" id="pv-serie">
+      <div class="pv pv-sfeer" id="pv-serie">
+        <header class="pagina-kop"><div class="pagina-kop-inhoud"><div class="pagina-kop-kicker">Uitslagen</div><h1>Series</h1><p>Bekijk per serie de uitslagen en de puntenstand.</p></div></header>
         <div id="serie-list"></div>
         <div id="serie-detail" style="display:none"></div>
         <div id="serie-wed-detail" style="display:none"></div>
       </div>
 
-      <div class="pv" id="pv-visweek">
+      <div class="pv pv-sfeer" id="pv-visweek">
+        <header class="pagina-kop"><div class="pagina-kop-inhoud"><div class="pagina-kop-kicker">Koppelcompetitie</div><h1>Visweek</h1><p>Vijf dagen, vijf locaties en één eigen koppelstand.</p></div></header>
         <div id="visweek-content"></div>
       </div>
 
-      <div class="pv" id="pv-rooster">
+      <div class="pv pv-sfeer" id="pv-rooster">
+        <header class="pagina-kop"><div class="pagina-kop-inhoud"><div class="pagina-kop-kicker">Agenda</div><h1>Wedstrijdrooster</h1><p>Alle komende wedstrijden en bijzondere vermeldingen tot het einde van het jaar.</p></div></header>
         <div id="rooster-content"></div>
       </div>
 
-      <div class="pv" id="pv-nieuws">
+      <div class="pv pv-sfeer" id="pv-nieuws">
+        <header class="pagina-kop"><div class="pagina-kop-inhoud"><div class="pagina-kop-kicker">Nieuws</div><h1>Laatste berichten</h1><p>Updates, verslagen en mededelingen van de vereniging.</p></div></header>
         <div id="nieuws-content"></div>
       </div>
 
-      <div class="pv" id="pv-kanjer">
+      <div class="pv pv-sfeer" id="pv-kanjer">
+        <header class="pagina-kop"><div class="pagina-kop-inhoud"><div class="pagina-kop-kicker">Competitie</div><h1>Kanjercompetitie</h1><p>Wie vangt er over alle wedstrijden het meeste vis?</p></div></header>
         <div id="kanjer-stats" class="pgrid"></div>
         <div class="info">Eigen gewicht per wedstrijd opgeteld over <strong>alle</strong> wedstrijden. Nul gram telt mee, niet deelgenomen telt niet mee.</div>
         <div id="kanjer-tbl"></div>
@@ -3458,44 +3621,58 @@ function renderRooster(){
   if(!host) return;
   const items=getRoosterOverzichtItems(d);
   if(!items.length){
-    host.innerHTML=`<div class="card" style="margin-bottom:16px">
-      <div class="stitle">Wedstrijd rooster</div>
-      <div class="sub" style="margin-bottom:0">Hier verschijnt het overzicht van alle komende wedstrijden en bijzondere vermeldingen tot het einde van het jaar.</div>
-    </div>
-    <div class="empty"><div class="empty-ico">🗓️</div>Geen komende items in het rooster.</div>`;
+    host.innerHTML=`<div class="empty"><div class="empty-ico">🗓️</div>Geen komende items in het rooster.</div>`;
     return;
   }
   let huidigeMaand='';
   const blocks=items.map(item=>{
     const maand=getRoosterMaandLabel(item.datum);
-    const maandHtml=maand!==huidigeMaand?`<div class="stitle" style="margin:20px 0 12px;font-size:22px">${escapeHtml(maand)}</div>`:'';
+    const maandHtml=maand!==huidigeMaand?`<div class="rooster-maand">${escapeHtml(maand)}</div>`:'';
     huidigeMaand=maand;
-    const tijdRegel=getRoosterTijdRegel(item);
+    const tijd=item.starttijd||item.eindtijd?`${item.starttijd||'?'} - ${item.eindtijd||'?'}`:'';
+    const details=[
+      ['Verzamelen',item.locatie],
+      ['Loting',item.verzamelen],
+      ['Wedstrijd',tijd],
+      ['Water',item.water]
+    ].filter(([,waarde])=>waarde);
     return `${maandHtml}<div class="card" style="margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
-        <div style="min-width:0;flex:1">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">${getRoosterTypeTagsHtml(item)}</div>
-          <div class="stitle" style="margin-bottom:8px">${escapeHtml(item.titel)}</div>
-          <div class="sub" style="margin-bottom:6px">📅 ${escapeHtml(nlDatum(item.datum))}</div>
-          ${item.water?`<div class="sub" style="margin-bottom:6px">🌊 ${escapeHtml(item.water)}</div>`:''}
-          ${item.locatie?`<div class="sub" style="margin-bottom:6px">📍 Verzamelen: ${escapeHtml(item.locatie)}</div>`:''}
-          ${tijdRegel?`<div class="sub" style="margin-bottom:6px">⏰ ${escapeHtml(tijdRegel)}</div>`:''}
-          ${item.omschrijving?`<div class="sub" style="margin-bottom:6px">${escapeHtml(item.omschrijving)}</div>`:''}
+      <div class="rooster-rij">
+        ${welcomeDatumBlokHtml(item.datum)}
+        <div class="rooster-tekst">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">${getRoosterTypeTagsHtml(item)}</div>
+          <div class="rooster-titel">${escapeHtml(item.titel)}</div>
+          <div class="sub" style="margin-bottom:0">${escapeHtml(nlDatum(item.datum))}</div>
+          ${item.omschrijving?`<div class="sub" style="margin:8px 0 0">${escapeHtml(item.omschrijving)}</div>`:''}
+          ${details.length?`<dl class="wh-agenda-details">${details.map(([sleutel,waarde])=>`<dt>${sleutel}</dt><dd>${escapeHtml(waarde)}</dd>`).join('')}</dl>`:''}
           ${item.opmerking?`<div class="info" style="margin:10px 0 0">${escapeHtml(item.opmerking)}</div>`:''}
+          ${item.type==='wedstrijd'&&item.gekoppeldeWedstrijdId?`<div style="margin-top:12px"><button class="btn btn-gh btn-sm" onclick="openWelcomeWedstrijd('${item.gekoppeldeWedstrijdId}')">Open wedstrijd</button></div>`:''}
         </div>
-        ${item.type==='wedstrijd'&&item.gekoppeldeWedstrijdId?`<div><button class="btn btn-gh btn-sm" onclick="openWelcomeWedstrijd('${item.gekoppeldeWedstrijdId}')">Open wedstrijd</button></div>`:''}
       </div>
     </div>`;
   }).join('');
-  host.innerHTML=`<div class="card" style="margin-bottom:16px">
-    <div class="stitle">Wedstrijd rooster</div>
-    <div class="sub" style="margin-bottom:0">Overzicht van alle komende wedstrijden en bijzondere vermeldingen tot het einde van het jaar.</div>
-  </div>${blocks}`;
+  host.innerHTML=blocks;
 }
 
 function getKomendeWedstrijdRoosterItems(d, aantal){
   const vandaag=getVandaagIso();
   return sortRoosterItems(getRoosterPlanningItems(d).filter(item=>item.type==='wedstrijd' && item.datum && item.datum>=vandaag)).slice(0,aantal);
+}
+// Eenvoudige lijnicoontjes in één stijl (vervangen de emoji's op de publieke pagina's)
+const LIJN_ICONEN={
+  kalender:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  plek:'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  klok:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  mensen:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 4.6a3.2 3.2 0 0 1 0 6.3M18 14.3c1.8.8 3 2.6 3 4.7"/>',
+  water:'<path d="M2 9c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 15c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/>',
+  lijst:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+  check:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16.5 9"/>',
+  doel:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/>',
+  gewicht:'<path d="M6.5 9h11l2 11h-15z"/><path d="M9.5 9a2.5 2.5 0 1 1 5 0"/>',
+  trofee:'<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/>'
+};
+function lijnIcoon(naam){
+  return `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${LIJN_ICONEN[naam]||''}</svg>`;
 }
 function welcomeDatumBlokHtml(iso, klein=false){
   const datum=new Date(`${iso}T12:00:00`);
@@ -3688,8 +3865,8 @@ function renderLos(){
         <div style="flex:0 0 240px;padding-right:20px">
           <div style="margin-bottom:4px"><span class="tag tag-k">Gescheiden koppel</span></div>
           <div style="font-family:var(--font);font-size:17px;font-weight:800;margin-bottom:3px">${lead.naam}</div>
-          <div style="font-size:12px;color:var(--muted)">Datum: ${nlDatum(lead.datum)}</div>
-          ${getWedstrijdPlaats(lead)?`<div style="font-size:12px;color:var(--muted)">Plaats: ${getWedstrijdPlaatsHtml(lead)}</div>`:''}
+          <div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px">${lijnIcoon('kalender')}${nlDatum(lead.datum)}</div>
+          ${getWedstrijdPlaats(lead)?`<div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:2px">${lijnIcoon('plek')}<span>${getWedstrijdPlaatsHtml(lead)}</span></div>`:''}
         </div>
         <div style="width:1px;background:var(--border);align-self:stretch;flex-shrink:0"></div>
         <div style="padding:0 20px;display:flex;flex-direction:column;gap:5px;flex-shrink:0;min-width:130px">
@@ -3785,8 +3962,8 @@ function renderLos(){
       <div style="flex:0 0 240px;padding-right:20px">
         <div style="margin-bottom:4px">${w.isKoppel?'<span class="tag tag-k">Koppel</span>':'<span class="tag tag-l">Solo</span>'}</div>
         <div style="font-family:var(--font);font-size:17px;font-weight:800;margin-bottom:3px">${w.naam}</div>
-        <div style="font-size:12px;color:var(--muted)">📅 ${nlDatum(w.datum)}</div>
-        ${getWedstrijdPlaats(w)?`<div style="font-size:12px;color:var(--muted)">📍 ${getWedstrijdPlaatsHtml(w)}</div>`:''}
+        <div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px">${lijnIcoon('kalender')}${nlDatum(w.datum)}</div>
+        ${getWedstrijdPlaats(w)?`<div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:2px">${lijnIcoon('plek')}<span>${getWedstrijdPlaatsHtml(w)}</span></div>`:''}
       </div>
       <div style="width:1px;background:var(--border);align-self:stretch;flex-shrink:0"></div>
       ${n>0?`
@@ -3844,10 +4021,10 @@ function renderSerie(){
         <div style="flex:1">
           <div style="margin-bottom:6px"><span class="tag tag-s">Serie · beste ${s.telBeste}</span> <span style="font-size:12px;color:var(--muted)">${s.seizoen}</span></div>
           <div style="font-family:var(--font);font-size:22px;font-weight:900;color:var(--gold);letter-spacing:.5px">${s.naam}</div>
-          <div style="margin-top:8px;display:flex;gap:16px">
-            <div class="sub">📋 <strong style="color:var(--text)">${weds.length}</strong> wedstrijden</div>
-            <div class="sub">✅ <strong style="color:var(--text)">${metUit}</strong> met uitslag</div>
-            <div class="sub">👥 <strong style="color:var(--text)">${totDeeln}</strong> unieke vissers</div>
+          <div class="sub meta-rij" style="margin:8px 0 0">
+            <span>${lijnIcoon('lijst')}<strong style="color:var(--text)">${weds.length}</strong> wedstrijden</span>
+            <span>${lijnIcoon('check')}<strong style="color:var(--text)">${metUit}</strong> met uitslag</span>
+            <span>${lijnIcoon('mensen')}<strong style="color:var(--text)">${totDeeln}</strong> unieke vissers</span>
           </div>
         </div>
         <div style="color:var(--muted);font-size:22px;margin-left:12px;align-self:center">›</div>
@@ -3882,14 +4059,14 @@ function renderSerieTab(serieId, tab, addToHistory=true){
       <span class="tag tag-s">Serie · beste ${s.telBeste}</span>
       <span style="color:var(--muted);font-size:12px;margin-left:8px">${s.seizoen}</span>
       <div style="font-family:var(--font);font-size:24px;font-weight:900;color:var(--gold);margin-top:6px">${s.naam}</div>
-      <div style="margin-top:8px;display:flex;gap:16px">
-        <div class="sub">📋 ${weds.length} wedstrijden</div>
-        <div class="sub">🎯 Beste ${s.telBeste} tellen</div>
+      <div class="sub meta-rij" style="margin:8px 0 0">
+        <span>${lijnIcoon('lijst')}${weds.length} wedstrijden</span>
+        <span>${lijnIcoon('doel')}Beste ${s.telBeste} tellen</span>
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:20px">
-      <button class="btn ${tab==='uitslagen'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','uitslagen')" style="padding:10px 24px;font-size:14px">📋 Uitslagen</button>
-      <button class="btn ${tab==='punten'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','punten')" style="padding:10px 24px;font-size:14px">🎯 Puntenstand</button>
+      <button class="btn ${tab==='uitslagen'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','uitslagen')" style="padding:10px 24px;font-size:14px">Uitslagen</button>
+      <button class="btn ${tab==='punten'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','punten')" style="padding:10px 24px;font-size:14px">Puntenstand</button>
     </div>`;
 
   let content='';
@@ -3933,7 +4110,7 @@ function renderSerieTab(serieId, tab, addToHistory=true){
             <div style="width:26px;height:26px;border-radius:50%;background:var(--g);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:13px;font-weight:800;flex-shrink:0">${idx+1}</div>
             <div style="font-weight:700;font-size:15px">${w.naam}</div>
           </div>
-          <div style="font-size:12px;color:var(--muted);padding-left:36px">📅 ${nlDatum(w.datum)}${getWedstrijdPlaats(w)?` · 📍 ${getWedstrijdPlaatsHtml(w)}`:''}</div>
+          <div class="meta-rij" style="font-size:12px;color:var(--muted);padding-left:36px;gap:4px 12px"><span>${lijnIcoon('kalender')}${nlDatum(w.datum)}</span>${getWedstrijdPlaats(w)?`<span>${lijnIcoon('plek')}${getWedstrijdPlaatsHtml(w)}</span>`:''}</div>
         </div>
         <div style="width:1px;background:var(--border);align-self:stretch;flex-shrink:0"></div>
         ${n>0?`
@@ -4083,6 +4260,8 @@ function bouwWedstrijdDetail(w, d, onTerug, isSerie){
   };
 
   let vakHtml='';
+  const vakWinnaars=[];
+  let podiumTop=[];
   if(vakken.length){
     vakHtml=vakken.map((vak,vi)=>{
       const vakLetter=getDisplayVakNaam(vak,vi);
@@ -4130,6 +4309,8 @@ function bouwWedstrijdDetail(w, d, onTerug, isSerie){
         }
       });
       const deelnemersMetRank=buildRankMeta(deelnemers);
+      const vakWinnaar=deelnemersMetRank.find(x=>!x.afwezig&&x.gewicht>0);
+      if(vakWinnaar) vakWinnaars.push({label:`Vak ${vakLetter}`,naam:vakWinnaar.naam,gewicht:vakWinnaar.gewicht});
       const rijen=deelnemersMetRank.map(x=>`<tr>
         <td>${x.afwezig?'&mdash;':`<div class="rank ${getRankClass(x.displayRank)}">${x.displayRank}</div>`}</td>
         <td style="font-weight:600">${x.naam}${x.rankLabel?` <span style="font-size:10px;color:${x.sharedRank?'var(--warn)':'var(--accent-2)'};text-transform:uppercase;letter-spacing:.6px">${x.rankLabel}</span>`:''}</td>
@@ -4189,6 +4370,7 @@ function bouwWedstrijdDetail(w, d, onTerug, isSerie){
       return 0;
     });
     const eenhedenMetRank=buildRankMeta(eenheden);
+    podiumTop=eenhedenMetRank.filter(e=>!e.afwezig&&e.gewicht>0).slice(0,3);
     if(mobiel && w.isKoppel){
       const mobileRows=eenhedenMetRank.map(e=>{
         const namen=(e.namen||'').split(' & ');
@@ -4236,18 +4418,41 @@ function bouwWedstrijdDetail(w, d, onTerug, isSerie){
         ${w.isKoppel?'<span class="tag tag-k" style="margin-left:6px">Koppel</span>':''}
       </div>
       <div style="font-family:var(--font);font-size:26px;font-weight:900;margin-top:6px">${w.naam}</div>
-      <div class="sub" style="font-size:13px;margin-top:4px">&#128197; ${nlDatum(w.datum)}${getWedstrijdPlaats(w)?` &middot; &#128205; ${getWedstrijdPlaatsHtml(w)}`:''}</div>
-      <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap">
-        <div class="sub">&#128101; <strong style="color:var(--text)">${uitActief.length}</strong> vissers</div>
-        <div class="sub">&#9878;&#65039; <strong style="color:var(--text)">${kg(totGew)} kg</strong> totaal gevangen</div>
-        ${vakken.length?`<div class="sub">Grootste vak: <strong style="color:var(--text)">${grootsteVak}</strong> vissers</div>`:''}
+      <div class="sub meta-rij" style="font-size:13px;margin:6px 0 0"><span>${lijnIcoon('kalender')}${nlDatum(w.datum)}</span>${getWedstrijdPlaats(w)?`<span>${lijnIcoon('plek')}${getWedstrijdPlaatsHtml(w)}</span>`:''}</div>
+      <div class="sub meta-rij" style="margin:8px 0 0">
+        <span>${lijnIcoon('mensen')}<strong style="color:var(--text)">${uitActief.length}</strong> vissers</span>
+        <span>${lijnIcoon('gewicht')}<strong style="color:var(--text)">${kg(totGew)} kg</strong> totaal gevangen</span>
+        ${vakken.length?`<span>Grootste vak: <strong style="color:var(--text)">${grootsteVak}</strong> vissers</span>`:''}
       </div>
       <div style="margin-top:14px">
         <button class="btn btn-b" type="button" onclick="openUitslagImagePreview('${w.id}')">Maak uitslagafbeelding</button>
       </div>
     </div>
-    <div style="font-family:var(--font);font-size:18px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--b);margin-bottom:12px">&#127942; Uitslag</div>
+    ${bouwUitslagPodiumHtml(podiumTop,vakWinnaars)}
+    <div class="uitslag-kop">${lijnIcoon('trofee')}${vakken.length?'Uitslag per vak':'Volledige uitslag'}</div>
     ${vakHtml}`;
+}
+
+// Top 3 groot bovenaan de uitslag; bij vakken de winnaar van elk vak
+function bouwUitslagPodiumHtml(top, vakWinnaars){
+  const kleur=(rank)=>rank===1?'background:#F5C842;color:#633806':rank===2?'background:#B4B2A9;color:#2C2C2A':rank===3?'background:#C96A1B;color:#23160B':'background:rgba(255,255,255,.12);color:var(--text)';
+  if(vakWinnaars.length){
+    return `<div class="uitslag-kop">${lijnIcoon('trofee')}Vakwinnaars</div>
+      <div class="uitslag-podium uitslag-podium-vakken" style="grid-template-columns:repeat(${Math.min(vakWinnaars.length,4)},minmax(0,1fr));align-items:stretch">${vakWinnaars.map(v=>`
+        <div class="podium-plek">
+          <div class="podium-sub" style="color:#F5C842;font-weight:800">${escapeHtml(v.label)}</div>
+          <div class="podium-naam">${escapeHtml(v.naam)}</div>
+          <div class="podium-gewicht">${kg(v.gewicht)} kg</div>
+        </div>`).join('')}</div>`;
+  }
+  if(!top.length) return '';
+  return `<div class="uitslag-podium"${top.length<3?` style="grid-template-columns:repeat(${top.length},minmax(0,1fr))"`:''}>${top.map((e,i)=>`
+    <div class="podium-plek podium-plek-${i+1}"${top.length<3?' style="order:0"':''}>
+      <div class="podium-rang" style="${kleur(e.displayRank)}">${e.displayRank}</div>
+      <div class="podium-naam">${escapeHtml(e.namen||'')}</div>
+      ${e.rankLabel?`<div class="podium-sub">${escapeHtml(e.rankLabel)}</div>`:''}
+      <div class="podium-gewicht">${kg(e.gewicht)} kg</div>
+    </div>`).join('')}</div>`;
 }
 
 
@@ -9440,30 +9645,10 @@ function renderKanjer(){
     </div>`;
     return;
   }
-  if(isMobileView()){
-    document.getElementById('kanjer-stats').innerHTML=`
-      <div class="sbox" style="padding:12px 14px">
-        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center">
-          <div style="text-align:left">
-            <div class="slbl" style="margin-top:0">Vissers</div>
-            <div class="snum" style="font-size:24px;text-align:left">${stand.length}</div>
-          </div>
-          <div style="text-align:left">
-            <div class="slbl" style="margin-top:0">Wedstrijden</div>
-            <div class="snum" style="font-size:24px;text-align:left">${aantalW}</div>
-          </div>
-        </div>
-      </div>
-      <div class="sbox" style="padding:12px 14px;text-align:left">
-        <div class="slbl" style="margin-top:0">Totaal kg</div>
-        <div class="snum" style="font-size:24px;text-align:left">${kg(totaal)}</div>
-      </div>`;
-  } else {
-    document.getElementById('kanjer-stats').innerHTML=`
-      <div class="sbox"><div class="snum">${stand.length}</div><div class="slbl">Vissers</div></div>
-      <div class="sbox"><div class="snum">${aantalW}</div><div class="slbl">Wedstrijden</div></div>
-      <div class="sbox"><div class="snum">${kg(totaal)}</div><div class="slbl">Totaal kg</div></div>`;
-  }
+  document.getElementById('kanjer-stats').innerHTML=`
+    <div class="sbox"><div class="snum">${stand.length}</div><div class="slbl">Vissers</div></div>
+    <div class="sbox"><div class="snum">${aantalW}</div><div class="slbl">Wedstrijden</div></div>
+    <div class="sbox"><div class="snum">${kg(totaal)}</div><div class="slbl">Totaal kg</div></div>`;
   if(!stand.length){document.getElementById('kanjer-tbl').innerHTML='<div class="empty"><div class="empty-ico">🐟</div>Nog geen uitslagen.</div>';return;}
   const previewBar=`<div style="display:flex;justify-content:flex-end;margin:0 0 10px">
     <button class="btn btn-g btn-sm" type="button" onclick="openKanjerImagePreview()">Preview afbeelding</button>
@@ -9472,15 +9657,14 @@ function renderKanjer(){
     const rows=stand.map((v,i)=>`<tr>
       <td style="padding:9px 8px;width:34px"><div class="rank ${i===0?'r1':i===1?'r2':i===2?'r3':'rx'}" style="width:22px;height:22px;font-size:11px">${i+1}</div></td>
       <td style="padding:9px 6px;min-width:0">
-        <button class="btn btn-link" style="display:block;width:100%;padding:0;border:none;background:none;color:var(--text);font-weight:700;font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;cursor:pointer" onclick="showKanjerDetail('${v.id}')">${escapeHtml(v.naam)}</button>
-        <div style="font-size:10px;color:var(--muted);margin-top:3px">Gemiddeld ${kg(Math.round(v.tot/v.deel))} kg</div>
+        <button class="kanjer-naam" type="button" style="font-size:14px" onclick="showKanjerDetail('${v.id}')">${escapeHtml(v.naam)}</button>
+        <div class="kanjer-sub">Gem. ${kg(Math.round(v.tot/v.deel))} kg · ${v.deel}× gevist</div>
       </td>
-      <td style="width:90px;padding:9px 4px 9px 8px;font-family:var(--font);font-size:14px;font-weight:800;color:var(--g);white-space:nowrap;text-align:right">${kg(v.tot)} kg</td>
-      <td style="width:72px;padding:9px 8px 9px 4px;font-family:var(--font);font-size:14px;font-weight:800;white-space:nowrap;text-align:right">${v.deel}x</td>
+      <td style="width:92px;padding:9px 10px 9px 4px;font-family:var(--font);font-size:15px;font-weight:800;color:var(--g);white-space:nowrap;text-align:right">${kg(v.tot)} kg</td>
     </tr>`).join('');
     document.getElementById('kanjer-tbl').innerHTML=`${previewBar}<div class="card" style="padding:0;overflow:hidden">
       <table class="tbl" style="width:100%;min-width:0;display:table;table-layout:fixed">
-        <thead><tr><th style="width:34px;padding:8px 8px">#</th><th style="padding:8px 6px">Visser</th><th style="width:90px;padding:8px 4px 8px 8px;text-align:right">Totaal</th><th style="width:72px;padding:8px 8px 8px 4px;text-align:right;font-size:10px">Deelnames</th></tr></thead>
+        <thead><tr><th style="width:34px;padding:8px 8px">#</th><th style="padding:8px 6px">Visser</th><th style="width:92px;padding:8px 10px 8px 4px;text-align:right">Totaal</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
@@ -9488,7 +9672,7 @@ function renderKanjer(){
   }
   const rows=stand.map((v,i)=>`<tr>
     <td><div class="rank ${i===0?'r1':i===1?'r2':i===2?'r3':'rx'}">${i+1}</div></td>
-    <td><button class="btn btn-link" style="padding:0;border:none;background:none;color:var(--text);font-weight:600;font-size:15px;cursor:pointer" onclick="showKanjerDetail('${v.id}')">${escapeHtml(v.naam)}</button></td>
+    <td><button class="kanjer-naam" type="button" onclick="showKanjerDetail('${v.id}')">${escapeHtml(v.naam)}</button></td>
     <td class="r tg">${kg(v.tot)} kg</td>
     <td class="r" style="color:var(--muted)">${v.deel}×</td>
     <td class="r" style="color:var(--muted)">${kg(Math.round(v.tot/v.deel))} kg</td>
@@ -9974,11 +10158,6 @@ function renderNieuws(){
     </div>`).join(''):'';
   host.innerHTML=`
     <div class="nieuws-layout">
-      <div class="card">
-        <div class="welcome-news-kicker">Nieuws</div>
-        <h1 class="welcome-news-title" style="margin-bottom:10px">Laatste berichten</h1>
-        <div class="sub" style="margin-bottom:0">Lees de nieuwste updates, verslagen en mededelingen van de vereniging.</div>
-      </div>
       <div class="card">
         <div class="nieuws-feature-grid">
           <div class="nieuws-feature-image">${featured.foto?`<img src="${featured.foto}" alt="${escapeHtmlAttr(featured.titel)}">`:renderNieuwsPlaceholder('Nieuws')}</div>
@@ -10579,6 +10758,18 @@ function renderVisweekDagUitslag(editie,dag,d){
       <td class="r"><strong>${item.punten}</strong></td>
     </tr>`;
   }).join('');
+  const kaarten=stand.map(item=>{
+    const r=item.resultaat;
+    const status=item.nietGevist?'Niet gevist':(item.afwezig?'Afwezig':`Stek ${escapeHtml(r.stek||'–')} · ${kg(r.gewicht1)} + ${kg(r.gewicht2)} kg`);
+    return `<div class="vw-kaart${item.rang===1&&!item.afwezig?' visweek-winner-row':''}">
+      <div class="vw-kop">
+        ${item.afwezig?'<div style="text-align:center;color:var(--muted)">–</div>':`<div class="rank ${item.rang===1?'r1':item.rang===2?'r2':item.rang===3?'r3':'rx'}">${item.rang}</div>`}
+        <div class="vw-naam">${escapeHtml(getVisweekKoppelNaam(item.koppel,d))}</div>
+        <div class="vw-totaal"><strong>${item.afwezig?'–':`${kg(item.gewicht)} kg`}</strong><span>${item.punten} p</span></div>
+      </div>
+      <div class="vw-dagen"><span>${status}</span></div>
+    </div>`;
+  }).join('');
   return `<div class="pgrid">
       <div class="sbox"><div class="snum">${actief.length}</div><div class="slbl">Koppels gevist</div></div>
       <div class="sbox"><div class="snum">${kg(totaal)}</div><div class="slbl">Kg gevangen</div></div>
@@ -10590,7 +10781,8 @@ function renderVisweekDagUitslag(editie,dag,d){
       <div><span class="tag tag-k">Dagwinnaar${winnaars.length===1?'':'s'}</span> <strong>${escapeHtml(winnaarTekst)}</strong></div>
     </div>
     <div class="info">Een koppel met 0 gram, een volledig afwezig koppel of een koppel dat deze dag nog niet actief was, krijgt ${getVisweekDagKoppelAantal(editie,dag.nummer)+1} punten: het aantal koppels van deze dag + 1.</div>
-    <div class="card" style="padding:0;overflow-x:auto">
+    <div class="card visweek-stand-kaarten" style="padding:0;overflow:hidden">${kaarten}</div>
+    <div class="card visweek-stand-tabel" style="padding:0;overflow-x:auto">
       <table class="tbl" style="min-width:840px"><thead><tr><th>#</th><th>Koppel / vissers</th><th>Stek</th><th class="r">Visser 1</th><th class="r">Visser 2</th><th class="r">Koppelgewicht</th><th class="r">Punten</th></tr></thead><tbody>${rows}</tbody></table>
     </div>`;
 }
@@ -10613,6 +10805,22 @@ function renderVisweekTussenstand(editie,d){
     }).join('');
     return `<tr class="${item.rang===1?'visweek-winner-row':''}"><td><strong>${item.rang}</strong></td><td style="min-width:240px"><strong>${escapeHtml(getVisweekKoppelNaam(item.koppel,d))}</strong>${individueleHtml}</td>${cellen}<td class="r"><strong>${item.punten}</strong></td><td class="r"><strong>${kg(item.gewicht)} kg</strong></td></tr>`;
   }).join('');
+  const kaarten=stand.map(item=>{
+    const perDag=new Map(item.dagen.map(x=>[x.nummer,x]));
+    const dagScores=dagen.map(dag=>{
+      const score=perDag.get(dag.nummer);
+      const tekst=!score?'–':`${score.punten} p · ${score.nietGevist?'niet gev.':(score.afwezig?'afw.':`${kg(score.gewicht)} kg`)}`;
+      return `<span>D${dag.nummer} <b>${tekst}</b></span>`;
+    }).join('');
+    return `<div class="vw-kaart${item.rang===1?' visweek-winner-row':''}">
+      <div class="vw-kop">
+        <div class="rank ${item.rang===1?'r1':item.rang===2?'r2':item.rang===3?'r3':'rx'}">${item.rang}</div>
+        <div class="vw-naam">${escapeHtml(getVisweekKoppelNaam(item.koppel,d))}</div>
+        <div class="vw-totaal">${visweekPubliekStandType==='gewicht'?`<strong>${kg(item.gewicht)} kg</strong><span>${item.punten} p</span>`:`<strong>${item.punten} p</strong><span>${kg(item.gewicht)} kg</span>`}</div>
+      </div>
+      <div class="vw-dagen">${dagScores}</div>
+    </div>`;
+  }).join('');
   const koploper=stand[0];
   const totaalAlleKoppels=stand.reduce((som,item)=>som+item.gewicht,0);
   return `<div class="visweek-filter-row">
@@ -10628,7 +10836,8 @@ function renderVisweekTussenstand(editie,d){
       <div class="sbox"><div class="snum">${kg(totaalAlleKoppels)}</div><div class="slbl">Kg alle koppels</div></div>
     </div>
     <div class="info">Tussenstand na ${dagen.length===5?'alle vijf dagen':`dag ${visweekPubliekDagNummer}`}. Bij gelijke totaalpunten geeft het hoogste totaalgewicht de doorslag.</div>
-    <div class="card" style="padding:0;overflow-x:auto"><table class="tbl" style="min-width:760px"><thead><tr><th>#</th><th>Koppel</th>${dagKolommen}<th class="r">Totaal punten</th><th class="r">Totaal gewicht</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    <div class="card visweek-stand-tabel" style="padding:0;overflow-x:auto"><table class="tbl" style="min-width:760px"><thead><tr><th>#</th><th>Koppel</th>${dagKolommen}<th class="r">Totaal punten</th><th class="r">Totaal gewicht</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="card visweek-stand-kaarten" style="padding:0;overflow:hidden">${kaarten}</div>`;
 }
 function renderVisweek(){
   const d=getData();
@@ -10650,9 +10859,8 @@ function renderVisweek(){
   const dagKnoppen=editie.dagen.map(item=>`<button class="btn ${item.nummer===visweekPubliekDagNummer?'btn-g':'btn-gh'} visweek-day-btn" onclick="setVisweekPubliekDag(${item.nummer})"><strong>Dag ${item.nummer}</strong><small>${escapeHtml(item.locatie||'Locatie nog leeg')}</small><small>${item.afgerond?'Uitslag ingevoerd':'Nog geen uitslag'}</small></button>`).join('');
   el.innerHTML=`
     <div class="card" style="margin-bottom:16px">
-      <div class="stitle">Visweek</div>
-      <div style="font-family:var(--font);font-size:30px;font-weight:900;margin-bottom:8px">${escapeHtml(editie.naam)}</div>
-      <div class="sub" style="margin-bottom:16px">Vijf dagen, vijf locaties en één zelfstandige koppelstand. Deze resultaten tellen niet mee in andere HSV-competities.</div>
+      <div style="font-family:var(--font);font-size:28px;font-weight:900;margin-bottom:6px">${escapeHtml(editie.naam)}</div>
+      <div class="sub" style="margin-bottom:16px">Deze resultaten tellen niet mee in andere HSV-competities.</div>
       <div class="visweek-toolbar">
         <div class="fg" style="margin:0"><label class="lbl">Editie</label><select onchange="setVisweekPubliekEditie(this.value)">${editieOpties}</select></div>
         <div class="visweek-switch">
