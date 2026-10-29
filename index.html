@@ -1960,6 +1960,69 @@ body.mobile-nav-open .sidebar-overlay{
   .visweek-stand-tabel{display:none}
   .visweek-stand-kaarten{display:block}
 }
+/* Uitslag invoeren */
+.inv-accent{position:relative;overflow:hidden;border-color:rgba(119,210,181,.35)!important}
+.inv-accent::before{content:"";position:absolute;inset:0 auto auto 0;width:100%;height:3px;background:var(--g)}
+.inv-titel{font-family:var(--font);font-size:24px;font-weight:900;line-height:1.05;text-transform:uppercase;margin:6px 0 0;overflow-wrap:anywhere}
+.inv-meta{display:grid;gap:4px;margin-top:10px;color:var(--muted);font-size:13px}
+.inv-meta .ico{color:var(--g)}
+.inv-knop-breed{width:100%;min-height:46px;font-size:15px;margin-top:14px}
+.inv-keuze{display:flex;gap:6px;margin-top:12px}
+.inv-keuze-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-family:var(--font);font-weight:700;margin-top:12px}
+.inv-details{padding:0!important}
+.inv-details>summary{list-style:none;cursor:pointer;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--font);font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);font-size:14px}
+.inv-details>summary::-webkit-details-marker{display:none}
+.inv-details>summary::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-top:-4px;transition:transform .15s}
+.inv-details[open]>summary::after{transform:rotate(-135deg);margin-top:4px}
+.inv-details-inhoud{padding:0 18px 18px}
+.inv-kop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.inv-kop-naam{font-family:var(--font);font-size:20px;font-weight:900;text-transform:uppercase;line-height:1.1;color:var(--g);overflow-wrap:anywhere}
+.inv-kop-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.inv-kop .btn{flex-shrink:0}
+.inv-zoek{font-size:17px!important;min-height:48px}
+.inv-resultaten{margin-top:10px;border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden}
+.inv-resultaat{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:12px 14px;background:rgba(255,255,255,.02);border:0;border-top:1px solid rgba(255,255,255,.06);color:var(--text);text-align:left;cursor:pointer;font:inherit}
+.inv-resultaat:first-child{border-top:0}
+.inv-resultaat:hover{background:rgba(119,210,181,.08)}
+.inv-resultaat strong{display:block;font-size:16px;font-weight:600}
+.inv-resultaat small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.inv-resultaat.is-ingevoerd small{color:var(--g)}
+.inv-resultaat-pijl{color:var(--g);font-size:13px;font-family:var(--font);font-weight:800;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap}
+.inv-velden{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;margin-top:12px}
+.inv-velden input{font-size:20px!important;font-weight:600;text-align:center;min-height:48px}
+.inv-vakken{display:flex;flex-wrap:wrap;gap:6px}
+.inv-vak{flex:1 1 0;min-width:44px;height:44px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);font-family:var(--font);font-weight:800;font-size:19px;cursor:pointer}
+.inv-vak.is-actief{background:rgba(119,210,181,.18);border-color:var(--g);color:var(--g)}
+.inv-acties{display:flex;gap:10px;margin-top:14px}
+.inv-acties .btn-g{flex:1;min-height:46px;font-size:15px}
+.inv-lijst-kop{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
+.inv-lijst-kop .stitle{margin-bottom:0}
+.inv-lijst-telling{font-size:12px;color:var(--muted);text-align:right}
+.inv-rij{display:grid;grid-template-columns:34px minmax(0,1fr) auto 60px;gap:8px;align-items:center;width:100%;padding:9px 0;background:none;border:0;border-top:1px solid rgba(255,255,255,.06);color:var(--text);text-align:left;cursor:pointer;font:inherit;font-size:14px}
+.inv-rij:hover{color:var(--g)}
+.inv-rij-stek{color:var(--muted)}
+.inv-rij-naam{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inv-rij-kg{text-align:right;font-weight:600}
+.inv-tag{font-size:11px;background:rgba(119,210,181,.15);color:var(--g);border:1px solid rgba(119,210,181,.28);padding:0 6px;border-radius:5px;font-weight:600}
+@supports (overflow:clip){body[data-page="invoer"] .page{overflow-x:clip}}
+.inv-balk{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 -2px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:rgba(13,23,31,.96);backdrop-filter:blur(8px);box-shadow:0 -10px 24px rgba(0,0,0,.25)}
+.inv-balk-telling{color:var(--muted);font-size:13px}
+.inv-balk-telling b{font-family:var(--font);font-size:22px;font-weight:900;color:var(--g);margin-right:4px}
+.inv-balk .btn{min-height:42px;font-size:14px}
+.inv-controle-kop,.inv-controle-rij{display:grid;grid-template-columns:minmax(0,1fr) 58px 58px 84px;gap:6px;align-items:center}
+.inv-controle-kop.zonder-vak,.inv-controle-rij.zonder-vak{grid-template-columns:minmax(0,1fr) 58px 84px}
+.inv-controle-kop{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-family:var(--font);font-weight:700;padding-bottom:6px}
+.inv-controle-kop span:not(:first-child){text-align:center}
+.inv-controle-rij{padding:6px 0;border-top:1px solid rgba(255,255,255,.06)}
+.inv-controle-naam{font-size:14px;overflow-wrap:anywhere;line-height:1.2}
+.inv-controle-rij input,.inv-controle-rij select{padding:7px 4px;text-align:center;font-size:15px!important;min-height:38px}
+.inv-controle-rij select{padding-right:4px;background-image:none;text-align-last:center}
+.inv-controle-rij .is-fout{border-color:var(--danger)}
+.inv-controle-rij .is-gewijzigd{border-color:var(--g)}
+@media (max-width: 900px){
+  .inv-controle-kop,.inv-controle-rij{grid-template-columns:minmax(0,1fr) 48px 46px 70px;gap:5px}
+  .inv-controle-kop.zonder-vak,.inv-controle-rij.zonder-vak{grid-template-columns:minmax(0,1fr) 52px 78px}
+}
 </style>
 <link rel="stylesheet" href="./lib/finance.css">
 </head>
@@ -3384,7 +3447,7 @@ function berekenPuntenWedstrijd(wId, d, opts={}) {
 function berekenSerieStand(serieId, d) {
   const serie = d.competities.find(c=>c.id===serieId);
   if (!serie) return [];
-  const vandaag = new Date().toISOString().slice(0,10);
+  const vandaag = getVandaagIso();
 
   // Alleen wedstrijden die gevist zijn: minimaal 1 uitslag ingevoerd
   const alleWeds = d.wedstrijden.filter(w=>w.competitieId===serieId);
@@ -4144,7 +4207,7 @@ function renderSerieTab(serieId, tab, addToHistory=true){
 
   if(tab==='punten'){
     const stand=berekenSerieStand(serieId,d);
-    const vandaag=new Date().toISOString().slice(0,10);
+    const vandaag=getVandaagIso();
     // Alleen geviste wedstrijden (datum verleden + heeft uitslag)
     const gevistenWeds=weds.filter(w=>d.uitslagen.some(u=>u.wedstrijdId===w.id));
     const toekomstigeWeds=weds.filter(w=>!d.uitslagen.some(u=>u.wedstrijdId===w.id));
@@ -4641,7 +4704,7 @@ function openDatePicker(targetId){
     targetId,
     month:basis.getMonth(),
     year:basis.getFullYear(),
-    selected:target.value||basis.toISOString().slice(0,10)
+    selected:target.value||basis.toLocaleDateString('sv-SE')
   };
   renderDatePicker();
   modal.classList.add('open');
@@ -4680,7 +4743,7 @@ function renderDatePicker(){
   const lastDay=new Date(datePickerState.year, datePickerState.month + 1, 0).getDate();
   const startOffset=(first.getDay()+6)%7;
   title.textContent=first.toLocaleDateString('nl-NL',{month:'long',year:'numeric'});
-  const todayIso=new Date().toISOString().slice(0,10);
+  const todayIso=getVandaagIso();
   let html='';
   for(let i=0;i<startOffset;i++){
     html += '<div class="date-picker-empty"></div>';
@@ -6997,12 +7060,56 @@ function syncRoosterBeheerForm(){
   }
 }
 
-function maakWedstrijdVanRoosterItem(itemId){
+// "Herfstserie" in de agenda en "Herfst Serie 2026" bij de uitslagen zijn dezelfde serie
+function normaliseerSerieNaam(naam){
+  return String(naam||'').toLowerCase().replace(/(19|20)\d{2}/g,'').replace(/[^a-z0-9]/g,'');
+}
+
+function getSerieJaar(serie){
+  const uitNaam=String(serie?.naam||'').match(/(19|20)\d{2}/);
+  return String(serie?.seizoen||'').trim() || (uitNaam?uitNaam[0]:'');
+}
+
+function zoekSerieVoorRoosterItem(d, item){
+  const naam=String(item?.serieNaam||'').trim();
+  const doel=normaliseerSerieNaam(naam);
+  if(!doel) return null;
+  const exact=d.competities.find(c=>c.type==='serie' && (c.naam||'').trim().toLowerCase()===naam.toLowerCase());
+  const jaar=String(item.datum||'').slice(0,4);
+  // Een serie van een ander jaar is nooit dezelfde, ook al lijkt de naam erop
+  const kandidaten=d.competities.filter(c=>c.type==='serie' && normaliseerSerieNaam(c.naam)===doel && (!getSerieJaar(c) || getSerieJaar(c)===jaar));
+  const opJaar=kandidaten.find(c=>getSerieJaar(c)===jaar);
+  const metWedstrijden=kandidaten.find(c=>d.wedstrijden.some(w=>w.competitieId===c.id));
+  return opJaar || metWedstrijden || (exact && kandidaten.includes(exact)?exact:null) || kandidaten[0] || null;
+}
+
+function zoekBestaandeWedstrijdVoorRoosterItem(d, item){
+  if(!item) return null;
+  if(item.gekoppeldeWedstrijdId){
+    const gekoppeld=d.wedstrijden.find(w=>w.id===item.gekoppeldeWedstrijdId);
+    if(gekoppeld) return gekoppeld;
+  }
+  if(item.wedstrijdVorm!=='serie') return null;
+  const serie=zoekSerieVoorRoosterItem(d,item);
+  const nummer=Number(item.serieWedstrijdNummer||0);
+  if(!serie || !nummer) return null;
+  return d.wedstrijden.find(w=>w.competitieId===serie.id && Number(w.serieWedstrijdNummer||0)===nummer) || null;
+}
+
+function maakWedstrijdVanRoosterItem(itemId, opties={}){
   const d=getData();
   const item=(d.roosterItems||[]).find(entry=>entry.id===itemId);
   if(!item || item.type!=='wedstrijd') return;
-  if(item.gekoppeldeWedstrijdId){
+  if(item.gekoppeldeWedstrijdId && d.wedstrijden.some(w=>w.id===item.gekoppeldeWedstrijdId)){
     openInvoer(item.gekoppeldeWedstrijdId);
+    return;
+  }
+  item.gekoppeldeWedstrijdId='';
+  const bestaand=zoekBestaandeWedstrijdVoorRoosterItem(d,item);
+  if(bestaand){
+    item.gekoppeldeWedstrijdId=bestaand.id;
+    saveData(d);
+    openInvoer(bestaand.id);
     return;
   }
   if(!item.datum || !item.water){
@@ -7019,9 +7126,10 @@ function maakWedstrijdVanRoosterItem(itemId){
       alert('Vul bij een seriewedstrijd eerst serienaam en wedstrijdnummer in.');
       return;
     }
-    let serie=d.competities.find(c=>c.type==='serie' && (c.naam||'').trim().toLowerCase()===serieNaam.toLowerCase());
+    let serie=zoekSerieVoorRoosterItem(d,item);
     if(!serie){
       serie={id:uid(),naam:serieNaam,type:'serie',telBeste:4,seizoen:String(item.datum||'').slice(0,4),vissers:[]};
+      if(typeof opties.gebruiktVakken==='boolean') serie.gebruiktVakken=opties.gebruiktVakken;
       d.competities.push(serie);
     }
     const result=maakSerieWedstrijdRecord(d, serie, nummer, item.datum, item.water, item.locatie||item.water);
@@ -7098,8 +7206,8 @@ function maakWedstrijdVanRoosterItem(itemId){
       eindtijd:String(item.eindtijd||'').trim(),
       competitieId:los.id,
       isKoppel:item.wedstrijdVorm==='koppel',
-      gebruiktVakken:false,
-      vakken:[],
+      gebruiktVakken:!!opties.gebruiktVakken,
+      vakken:opties.gebruiktVakken?[{vakId:uid(),naam:'A',vissers:[]}]:[],
       roosterOpmerking:String(item.opmerking||'').trim()
     };
     d.wedstrijden.push(wedstrijd);
@@ -7479,7 +7587,7 @@ function parseExcelDatum(v){
   }
   // Probeer JS Date parse
   const d=new Date(s);
-  if(!isNaN(d.getTime()))return d.toISOString().slice(0,10);
+  if(!isNaN(d.getTime()))return d.toLocaleDateString('sv-SE');
   return'';
 }
 
@@ -8311,20 +8419,24 @@ function wisAlles(){
 function renderInvoerList(){
   document.getElementById('invoer-list').style.display='block';
   document.getElementById('invoer-form').style.display='none';
+  const agendaItems=getInvoerAgendaItems(getData());
   document.getElementById('invoer-list').innerHTML=`
     <div class="card">
       <div class="stitle">Uitslag Invoeren</div>
       <div style="font-family:var(--font);font-size:28px;font-weight:900;margin-bottom:8px">Nieuwe invoer</div>
-      <div class="sub">Start hier een nieuwe uitslaginvoer.</div>
+      <div class="sub">${agendaItems.length?'Kies de wedstrijd uit de agenda. Alle gegevens staan al klaar.':'Er staat de afgelopen week geen wedstrijd in de agenda. Vul de wedstrijd hieronder in.'}</div>
     </div>
-    <div class="card">
+    ${agendaItems.map(renderInvoerAgendaKaartHtml).join('')}
+    <details class="card inv-details"${agendaItems.length?'':' open'}>
+      <summary>${agendaItems.length?'Andere wedstrijd invoeren':'Wedstrijd invoeren'}</summary>
+      <div class="inv-details-inhoud">
       <div class="fg">
         <label class="lbl">Wedstrijdnaam</label>
         <input id="new-invoer-naam" placeholder="Bijvoorbeeld Kanaal van Steenenhoek">
       </div>
       <div class="fg">
         <label class="lbl">Datum</label>
-        <input id="new-invoer-datum" type="text" inputmode="none" readonly value="${new Date().toISOString().slice(0,10)}" placeholder="Kies datum" onclick="openDatePicker('new-invoer-datum')">
+        <input id="new-invoer-datum" type="text" inputmode="none" readonly value="${getVandaagIso()}" placeholder="Kies datum" onclick="openDatePicker('new-invoer-datum')">
       </div>
       <div class="fg">
         <label class="lbl">Type</label>
@@ -8352,8 +8464,79 @@ function renderInvoerList(){
       </div>
       <div id="new-invoer-err" class="err" style="display:none"></div>
       <button class="btn btn-g" onclick="startNieuweInvoer()">Nieuwe invoer starten</button>
-    </div>`;
+      </div>
+    </details>`;
   toggleNieuwInvoerType(document.getElementById('new-invoer-type')?.value||'solo');
+}
+
+function formatInvoerDatum(iso, kort=false){
+  const datum=new Date(`${iso}T12:00:00`);
+  if(Number.isNaN(datum.getTime())) return String(iso||'');
+  const tekst=datum.toLocaleDateString('nl-NL',kort?{weekday:'short',day:'numeric',month:'short'}:{weekday:'long',day:'numeric',month:'long'}).replace(/\./g,'');
+  return tekst.charAt(0).toUpperCase()+tekst.slice(1);
+}
+
+// Geplande wedstrijden van vandaag en de afgelopen week die nog geen uitslag hebben
+function getInvoerAgendaItems(d){
+  const vandaag=getVandaagIso();
+  const grens=new Date(`${vandaag}T12:00:00`);
+  grens.setDate(grens.getDate()-7);
+  const vanaf=grens.toLocaleDateString('sv-SE');
+  return (d.roosterItems||[])
+    .filter(item=>item.type==='wedstrijd' && item.datum && item.datum>=vanaf && item.datum<=vandaag)
+    .filter(item=>{ const w=zoekBestaandeWedstrijdVoorRoosterItem(d,item); return !w || !d.uitslagen.some(u=>u.wedstrijdId===w.id); })
+    .sort((a,b)=>String(b.datum).localeCompare(String(a.datum)));
+}
+
+function renderInvoerAgendaKaartHtml(item){
+  const d=getData();
+  const isVandaag=item.datum===getVandaagIso();
+  const vorm=item.wedstrijdVorm||'solo';
+  const vormLabel=getRoosterWedstrijdVormMeta(vorm).label;
+  const bestaand=zoekBestaandeWedstrijdVoorRoosterItem(d,item);
+  const serie=vorm==='serie'?zoekSerieVoorRoosterItem(d,item):null;
+  // Bij een bestaande serie liggen de vakken al vast; alleen een nieuwe serie of losse wedstrijd kiest hier
+  const kiestVakken=!bestaand && (vorm==='solo' || vorm==='koppel' || (vorm==='serie' && !serie));
+  const vakkenInfo=bestaand?(bestaand.gebruiktVakken?'Met vakken':'Zonder vakken'):(serie?(getSerieGebruiktVakken(serie,d)?'Met vakken':'Zonder vakken'):'');
+  const plaats=[item.water,item.locatie].filter(Boolean).map(escapeHtml).join(' · ');
+  const tijden=[
+    item.verzamelen?`Verzamelen ${escapeHtml(item.verzamelen)}`:'',
+    item.starttijd?`vissen ${escapeHtml(item.starttijd)}${item.eindtijd?`–${escapeHtml(item.eindtijd)}`:''}`:''
+  ].filter(Boolean).join(' · ');
+  const vakkenKeuze=kiestVakken?`
+      <div class="inv-keuze-label">Vakken</div>
+      <div class="inv-keuze" id="agenda-vakken-${item.id}" data-vakken="nee">
+        <button type="button" class="inv-vak is-actief" style="font-size:15px" onclick="kiesAgendaVakken('${item.id}','nee',this)">Zonder vakken</button>
+        <button type="button" class="inv-vak" style="font-size:15px" onclick="kiesAgendaVakken('${item.id}','ja',this)">Met vakken</button>
+      </div>`:'';
+  return `
+    <div class="card inv-accent">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <span class="stitle" style="margin:0;color:var(--g)">${isVandaag?'Vandaag gepland':'Nog in te voeren'}</span>
+        <span class="tag ${vorm==='serie'?'tag-s':(vorm==='solo'?'tag-l':'tag-k')}">${escapeHtml(vormLabel)}</span>
+      </div>
+      <div class="inv-titel">${escapeHtml(getRoosterWedstrijdTitelFromItem(item))}</div>
+      <div class="inv-meta">
+        <div>${lijnIcoon('kalender')} ${escapeHtml(formatInvoerDatum(item.datum))}</div>
+        ${plaats?`<div>${lijnIcoon('water')} ${plaats}</div>`:''}
+        ${tijden?`<div>${lijnIcoon('klok')} ${tijden}</div>`:''}
+        ${vakkenInfo?`<div>${lijnIcoon('lijst')} ${vakkenInfo}${serie?` · ${escapeHtml(serie.naam)}`:''}</div>`:''}
+      </div>
+      ${vakkenKeuze}
+      <button class="btn btn-g inv-knop-breed" onclick="startInvoerVanuitAgenda('${item.id}')">${bestaand?'Verder met invoer':'Start invoer'} →</button>
+    </div>`;
+}
+
+function kiesAgendaVakken(itemId, waarde, knop){
+  const box=document.getElementById(`agenda-vakken-${itemId}`);
+  if(!box) return;
+  box.dataset.vakken=waarde;
+  box.querySelectorAll('.inv-vak').forEach(b=>b.classList.toggle('is-actief',b===knop));
+}
+
+function startInvoerVanuitAgenda(itemId){
+  const box=document.getElementById(`agenda-vakken-${itemId}`);
+  maakWedstrijdVanRoosterItem(itemId,{gebruiktVakken:box?.dataset.vakken==='ja'});
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -8601,50 +8784,53 @@ function getWaterkantIngevoerdeRows(){
 
 function renderWaterkantResultatenHtml(){
   const zoekTerm=(invoerState.zoek||'').trim().toLowerCase();
-  if(invoerState.activeVid){
-    return '<div class="sub">Visser gekozen. Vul hieronder de gegevens in.</div>';
-  }
   if(!zoekTerm){
-    return '<div class="sub">Typ letters om een visser te zoeken.</div>';
+    return '<div class="sub" style="margin-top:8px">Typ een paar letters van de naam.</div>';
   }
   const resultaten=invoerState.rows
     .filter(r=>!r.afwezig && r.naam.toLowerCase().includes(zoekTerm))
     .sort((a,b)=>a.naam.localeCompare(b.naam,'nl'));
   if(!resultaten.length){
-    return '<div class="sub">Geen vissers gevonden.</div>';
+    return '<div class="sub" style="margin-top:8px">Geen vissers gevonden.</div>';
   }
-  return `<div class="home-grid">${resultaten.map(r=>`
-    <button class="home-card" onclick="startVisserInvoer('${r.vid}')" style="text-align:left;padding:10px 12px;min-height:auto">
-      <span class="home-card-overline" style="font-size:11px;margin-bottom:4px">${r.selected?'Bewerken':'Deelnemer'}</span>
-      <strong style="font-size:18px;line-height:1.15">${escapeHtml(r.naam)}</strong>
-      <span style="font-size:12px;margin-top:6px">${r.selected?`Stek ${escapeHtml(String(r.stek||'-'))} | ${kg(parseFloat(r.gewicht)||0)} kg`:'Klik om te kiezen'}</span>
-    </button>`).join('')}</div>`;
+  return `<div class="inv-resultaten">${resultaten.map(r=>{
+    const ingevoerd=r.selected && String(r.stek||'').trim()!=='';
+    return `
+    <button type="button" class="inv-resultaat${ingevoerd?' is-ingevoerd':''}" onclick="startVisserInvoer('${r.vid}')">
+      <span>
+        <strong>${escapeHtml(r.naam)}</strong>
+        <small>${ingevoerd?`✓ Al ingevoerd · stek ${escapeHtml(String(r.stek))} · ${kg(parseFloat(r.gewicht)||0)} kg`:'Tik om te kiezen'}</small>
+      </span>
+      <span class="inv-resultaat-pijl">${ingevoerd?'Bewerken':'Kies →'}</span>
+    </button>`;
+  }).join('')}</div>`;
 }
 
-function renderWaterkantIngevoerdeHtml(){
-  const ingevoerd=getWaterkantIngevoerdeRows();
+function getInvoerVakTelling(rows){
+  if(!invoerState.gebruiktVakken) return '';
+  const telling={};
+  rows.forEach(r=>{
+    const vak=getVakNaamVoorVisser(r.vid)||'-';
+    telling[vak]=(telling[vak]||0)+1;
+  });
+  return Object.keys(telling).sort((a,b)=>a.localeCompare(b,'nl')).map(vak=>`${escapeHtml(vak)} ${telling[vak]}`).join(' · ');
+}
+
+function renderWaterkantIngevoerdeHtml(maxAantal=0){
+  let ingevoerd=getWaterkantIngevoerdeRows();
   if(!ingevoerd.length){
     return '<div class="sub">Nog geen vissers ingevoerd.</div>';
   }
   const d=getData();
   const w=d.wedstrijden.find(x=>x.id===invoerState.wId);
+  if(maxAantal>0) ingevoerd=ingevoerd.filter(r=>r.vid===invoerState.laatsteVid).concat(ingevoerd.filter(r=>r.vid!==invoerState.laatsteVid)).slice(0,maxAantal);
   return ingevoerd.map(r=>`
-    <div class="card" style="padding:14px 16px">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-        <div>
-          <div style="font-weight:800;font-size:18px">${escapeHtml(r.naam)}</div>
-          <div class="sub" style="margin-top:6px">
-            Stek ${escapeHtml(String(r.stek||'-'))}
-            ${invoerState.gebruiktVakken?` | Vak ${escapeHtml(getVakNaamVoorVisser(r.vid)||'-')}`:''}
-            | ${kg(parseFloat(r.gewicht)||0)} kg
-            ${isGescheidenKoppelWedstrijd(w) && r.koppelId?' | Vast koppel':''}
-          </div>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-b btn-sm" onclick="bewerkInvoerVisser('${r.vid}')">Bewerken</button>
-        </div>
-      </div>
-    </div>`).join('');
+    <button type="button" class="inv-rij" onclick="bewerkInvoerVisser('${r.vid}')">
+      <span class="inv-rij-stek">${escapeHtml(String(r.stek||'-'))}</span>
+      <span class="inv-rij-naam">${escapeHtml(r.naam)}${isGescheidenKoppelWedstrijd(w) && r.koppelId?' <span class="sub">· vast koppel</span>':''}</span>
+      <span>${invoerState.gebruiktVakken?`<span class="inv-tag">${escapeHtml(getVakNaamVoorVisser(r.vid)||'-')}</span>`:''}</span>
+      <span class="inv-rij-kg">${kg(parseFloat(r.gewicht)||0)}</span>
+    </button>`).join('')+'<div class="sub" style="padding-top:6px">Tik op een regel om te bewerken.</div>';
 }
 
 function setInvoerZoek(value){
@@ -8657,12 +8843,41 @@ function setInvoerZoek(value){
 function startVisserInvoer(vid){
   const row=invoerState.rows.find(r=>r.vid===vid);
   if(!row) return;
-  row.selected=true;
+  // Pas bij opslaan telt de visser als ingevoerd, zodat annuleren geen lege regel achterlaat
   row.afwezig=false;
   invoerState.activeVid=vid;
   invoerState.reviewMode=false;
+  invoerState.lotingMode=false;
   renderInvoerForm();
   focusWaterkantStek();
+}
+
+function kiesWaterkantVak(letter){
+  const input=document.getElementById('waterkant-vak');
+  if(input) input.value=letter;
+  document.querySelectorAll('#waterkant-vak-knoppen .inv-vak').forEach(b=>b.classList.toggle('is-actief',b.dataset.vak===letter));
+}
+
+// Bestaande vakken plus de eerstvolgende letter, zodat er altijd een nieuw vak gekozen kan worden
+function getInvoerVakLetters(huidig=''){
+  const letters=['A','B','C','D','E','F','G','H','I','J'];
+  const d=getData();
+  const w=d.wedstrijden.find(x=>x.id===invoerState.wId);
+  if(isGescheidenKoppelWedstrijd(w)) return ['A','B'];
+  const bestaand=(invoerState.vakken||[]).map((v,i)=>getDisplayVakNaam(v,i));
+  if(huidig) bestaand.push(huidig);
+  const hoogste=bestaand.reduce((max,l)=>Math.max(max,letters.indexOf(l)),-1);
+  return letters.slice(0,Math.min(letters.length,hoogste+2));
+}
+
+function waterkantVeldEnter(event, volgendeId){
+  if(event.key!=='Enter') return;
+  event.preventDefault();
+  if(volgendeId){
+    const el=document.getElementById(volgendeId);
+    if(el){ el.focus(); if(el.select) el.select(); return; }
+  }
+  saveActieveVisser();
 }
 
 function annuleerVisserInvoer(){
@@ -8797,14 +9012,16 @@ function saveActieveVisser(){
   row.stek=stek;
   row.gewicht=String(parseFloat(gram)||0);
   clearEntityRangForVid(vid);
-  if(gebruiktVakken) setVakVoorVisser(vid,vak);
+  if(gebruiktVakken){ setVakVoorVisser(vid,vak); invoerState.laatsteVak=vak.toUpperCase(); }
   syncKoppelsOpStek();
   invoerState.activeVid=null;
+  invoerState.laatsteVid=vid;
   invoerState.zoek='';
   invoerState.reviewMode=false;
   invoerState.lotingMode=false;
   renderInvoerForm();
   focusWaterkantZoek();
+  showAppNotice(`✓ ${row.naam} ingevoerd ·${kg(parseFloat(row.gewicht)||0)} kg`,'success',1800);
 }
 
 function toonInvoerOverzicht(){
@@ -8818,10 +9035,98 @@ function toonInvoerOverzicht(){
     }
   }
   invoerState.activeVid=null;
-  syncLotingGroups();
-  invoerState.lotingMode=(invoerState.lotingGroups||[]).length>0;
-  invoerState.reviewMode=!invoerState.lotingMode;
+  invoerState.lotingMode=false;
+  invoerState.reviewMode=true;
   renderInvoerForm();
+  scrollInvoerNaarBoven();
+}
+
+// Vakken aan of uit zetten tijdens de invoer; wordt pas bij uploaden bij de wedstrijd opgeslagen
+function zetInvoerVakken(aan){
+  if(!!invoerState.gebruiktVakken===aan) return;
+  if(!aan){
+    const ingedeeld=(invoerState.vakken||[]).reduce((n,v)=>n+(v.vissers||[]).length,0);
+    if(ingedeeld && !confirm(`${ingedeeld} visser(s) staan al in een vak. Vakken uitzetten en die indeling wissen?`)) return;
+    invoerState.vakken=[];
+    invoerState.laatsteVak='';
+  }else if(!(invoerState.vakken||[]).length){
+    invoerState.vakken=[{vakId:uid(),naam:'A',vissers:[]}];
+  }
+  invoerState.gebruiktVakken=aan;
+  renderInvoerForm();
+  const kop=document.querySelector('#invoer-form .inv-details');
+  if(kop) kop.open=true;
+  showAppNotice(aan?'Vakken staan aan':'Vakken staan uit');
+}
+
+function scrollInvoerNaarBoven(){
+  document.body.scrollTop=0;
+  document.documentElement.scrollTop=0;
+}
+
+// Na de controle: eerst loting als er gelijke gewichten zijn, anders direct uploaden
+function gaVerderVanuitControle(){
+  if(!controleIsGeldig()) return;
+  const groepen=syncLotingGroups();
+  if(groepen.length){
+    invoerState.reviewMode=false;
+    invoerState.lotingMode=true;
+    renderInvoerForm();
+    scrollInvoerNaarBoven();
+    return;
+  }
+  opslaanUitslag(true);
+}
+
+function controleIsGeldig(){
+  const err=document.getElementById('controle-err');
+  const fout=document.querySelector('#invoer-form .inv-controle-rij .is-fout');
+  if(err) err.style.display=fout?'block':'none';
+  if(fout){
+    err.textContent='Er staat nog een leeg of ongeldig vakje (rood gemarkeerd).';
+    fout.focus();
+    return false;
+  }
+  return true;
+}
+
+function updateControleVeld(vid, veld, el){
+  const row=invoerState.rows.find(r=>r.vid===vid);
+  if(!row) return;
+  const waarde=String(el.value||'').trim();
+  if(veld==='stek'){
+    el.classList.toggle('is-fout',!waarde);
+    if(!waarde) return;
+    row.stek=waarde;
+  } else if(veld==='gram'){
+    const gram=parseFloat(waarde.replace(',','.'));
+    const ongeldig=!waarde || Number.isNaN(gram) || gram<0;
+    el.classList.toggle('is-fout',ongeldig);
+    if(ongeldig) return;
+    row.gewicht=String(gram);
+  } else if(veld==='vak'){
+    el.classList.toggle('is-fout',!waarde);
+    if(!waarde) return;
+    setVakVoorVisser(vid,waarde);
+  }
+  el.classList.add('is-gewijzigd');
+  clearEntityRangForVid(vid);
+  syncKoppelsOpStek();
+  werkControleKnopBij();
+}
+
+function werkControleKnopBij(){
+  const knop=document.getElementById('opslaan-btn');
+  if(knop) knop.textContent=syncLotingGroups().length?'Naar loting →':'Upload uitslag';
+  const err=document.getElementById('controle-err');
+  if(err && !document.querySelector('#invoer-form .inv-controle-rij .is-fout')) err.style.display='none';
+}
+
+function terugNaarControleVanuitLoting(){
+  invoerState.lotingMode=false;
+  invoerState.reviewMode=true;
+  renderInvoerForm();
+  scrollInvoerNaarBoven();
 }
 
 function getLotingVakInfo(vid){
@@ -9215,7 +9520,7 @@ function renderGescheidenKoppelInvoerForm(w, d, comp, compLabel, lotingGroups, a
       <div class="card">
         <div class="stitle">Afronden</div>
         <div class="sub" style="margin-bottom:12px">Als alle koppels compleet zijn ingevuld, ga je door naar het overzicht en daarna naar de eindstand.</div>
-        <button class="btn btn-g" style="min-width:240px" onclick="toonInvoerOverzicht()" id="opslaan-btn">${lotingGroups.length?'Naar loting':'Naar overzicht'}</button>
+        <button class="btn btn-g" style="min-width:240px" onclick="toonInvoerOverzicht()" id="opslaan-btn">Naar controle →</button>
       </div>`;
     return;
   }
@@ -9291,7 +9596,7 @@ function renderGescheidenKoppelInvoerForm(w, d, comp, compLabel, lotingGroups, a
     <div class="card">
       <div class="stitle">Afronden</div>
       <div class="sub" style="margin-bottom:12px">Als alles akkoord is, ga je eerst naar een totaaloverzicht en kun je daar nog bewerken.</div>
-      <button class="btn btn-g" style="min-width:240px" onclick="toonInvoerOverzicht()" id="opslaan-btn">${lotingGroups.length?'Naar loting':'Naar overzicht'}</button>
+      <button class="btn btn-g" style="min-width:240px" onclick="toonInvoerOverzicht()" id="opslaan-btn">Naar controle →</button>
     </div>`;
 }
 
@@ -9315,119 +9620,146 @@ function renderInvoerForm(){
     renderGescheidenKoppelInvoerForm(w, d, comp, compLabel, lotingGroups, activeRow, ingevoerd);
     return;
   }
+  const kopSub=[formatInvoerDatum(w.datum,true),w.water].filter(Boolean).map(escapeHtml).join(' · ');
   if(s.lotingMode){
     document.getElementById('invoer-form').innerHTML=`
-      <div class="card">
-        <div class="stitle">Loting</div>
-        <div style="font-family:var(--font);font-size:30px;font-weight:900;margin-bottom:8px">${escapeHtml(w.naam)}</div>
-        <div class="sub" style="margin-bottom:12px">${lotingGroups.length} gelijke groep(en) gevonden${onopgelosteLoting.length?` · ${onopgelosteLoting.length} nog controleren`:''}</div>
-        ${onopgelosteLoting.length?`<div class="err" style="margin-bottom:0">Niet alle gelijke groepen zijn volledig ingevuld. Je kunt wel doorgaan naar controle, maar bekijk deze groepen nog even goed.</div>`:'<div class="info" style="margin-bottom:0">Stel hier per gelijke groep de loting of gedeelde plek in.</div>'}
+      <div class="card inv-accent">
+        <div class="stitle" style="color:var(--g)">Loting</div>
+        <div class="inv-titel">${escapeHtml(w.naam)}</div>
+        <div class="sub" style="margin:8px 0 12px">${lotingGroups.length} groep(en) met gelijk gewicht${onopgelosteLoting.length?` · ${onopgelosteLoting.length} nog invullen`:''}</div>
+        ${onopgelosteLoting.length?`<div class="err" style="margin-bottom:0">Niet alle groepen zijn volledig ingevuld. Uploaden kan wel, maar bekijk deze groepen nog even goed.</div>`:'<div class="info" style="margin-bottom:0">Alle groepen zijn ingevuld. Je kunt de uitslag uploaden.</div>'}
       </div>
       ${renderLotingGroepenHtml()}
-      <div class="card">
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-gh" onclick="terugNaarInvoerVanuitLoting()">Terug naar invoer</button>
-          <button class="btn btn-g" onclick="gaNaarControleVanuitLoting()">Naar controle</button>
-        </div>
+      <div class="inv-balk">
+        <button class="btn btn-gh" onclick="terugNaarControleVanuitLoting()">← Controle</button>
+        <button class="btn btn-g" onclick="opslaanUitslag(true)" id="opslaan-btn">Upload uitslag</button>
       </div>`;
     return;
   }
   if(s.reviewMode){
+    const vakLetters=getInvoerVakLetters();
+    const zonderVak=s.gebruiktVakken?'':' zonder-vak';
+    const vakTellingControle=getInvoerVakTelling(ingevoerd);
+    const rijen=ingevoerd.map(r=>{
+      const vak=getVakNaamVoorVisser(r.vid);
+      const letters=vak && !vakLetters.includes(vak)?[...vakLetters,vak]:vakLetters;
+      return `
+        <div class="inv-controle-rij${zonderVak}">
+          <span class="inv-controle-naam">${escapeHtml(r.naam)}</span>
+          <input inputmode="numeric" value="${escapeHtmlAttr(r.stek)}" aria-label="Stek ${escapeHtmlAttr(r.naam)}" onchange="updateControleVeld('${r.vid}','stek',this)">
+          ${s.gebruiktVakken?`<select aria-label="Vak ${escapeHtmlAttr(r.naam)}" onchange="updateControleVeld('${r.vid}','vak',this)">
+            ${vak?'':'<option value="">-</option>'}${letters.map(l=>`<option value="${l}" ${l===vak?'selected':''}>${l}</option>`).join('')}
+          </select>`:''}
+          <input inputmode="decimal" value="${escapeHtmlAttr(r.gewicht)}" aria-label="Grammen ${escapeHtmlAttr(r.naam)}" onchange="updateControleVeld('${r.vid}','gram',this)">
+        </div>`;
+    }).join('');
     document.getElementById('invoer-form').innerHTML=`
-      <div class="card">
-        <div class="stitle">Controle Overzicht</div>
-        <div style="font-family:var(--font);font-size:30px;font-weight:900;margin-bottom:8px">${escapeHtml(w.naam)}</div>
-        <div class="sub">${ingevoerd.length} visser(s) ingevoerd${s.gebruiktVakken?` | ${s.vakken.length||0} vakken`:''}${lotingGroups.length?` | ${lotingGroups.length} lotinggroep(en)`:''}</div>
-      </div>
-      ${onopgelosteLoting.length?`<div class="card" style="border-color:rgba(217,106,111,.28)">
-        <div class="stitle" style="color:var(--danger)">Loting nog controleren</div>
-        <div class="sub">Er zijn nog ${onopgelosteLoting.length} gelijke groep(en) zonder volledige plaatsverdeling. Opslaan mag wel, maar controleer dit als je een bewuste loting of gedeelde plek wilt vastleggen.</div>
-      </div>`:''}
-      <div class="card">
-        <div class="stitle">Ingevoerde Uitslag</div>
-        ${renderWaterkantIngevoerdeHtml()}
+      <div class="card inv-accent">
+        <div class="stitle" style="color:var(--g)">Controle</div>
+        <div class="inv-titel">${escapeHtml(w.naam)}</div>
+        <div class="sub" style="margin-top:6px">${kopSub} · ${ingevoerd.length} visser(s)${vakTellingControle?` · ${vakTellingControle}`:''}</div>
+        <div class="sub" style="margin-top:8px">Loop alles na. Tik op een vakje om stek${s.gebruiktVakken?', vak':''} of grammen direct te wijzigen.</div>
       </div>
       <div class="card">
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-gh" onclick="${lotingGroups.length?`invoerState.reviewMode=false; invoerState.lotingMode=true; renderInvoerForm();`:`invoerState.reviewMode=false; renderInvoerForm(); focusWaterkantZoek();`}">${lotingGroups.length?'Terug naar loting':'Terug naar invoer'}</button>
-          <button class="btn btn-g" onclick="opslaanUitslag(true)" id="opslaan-btn">Upload uitslag</button>
-        </div>
+        ${ingevoerd.length?`<div class="inv-controle-kop${zonderVak}"><span>Visser</span><span>Stek</span>${s.gebruiktVakken?'<span>Vak</span>':''}<span>Gram</span></div>${rijen}`:'<div class="sub">Nog geen vissers ingevoerd.</div>'}
+        <div id="controle-err" class="err" style="display:none;margin:10px 0 0"></div>
+      </div>
+      <div class="inv-balk">
+        <button class="btn btn-gh" onclick="invoerState.reviewMode=false; renderInvoerForm(); focusWaterkantZoek();">← Invoer</button>
+        <button class="btn btn-g" onclick="gaVerderVanuitControle()" id="opslaan-btn">${lotingGroups.length?'Naar loting →':'Upload uitslag'}</button>
       </div>`;
     return;
   }
 
-  const activeHtml=activeRow?`
-    <div class="card" style="border-color:rgba(110,196,168,.22);background:rgba(110,196,168,.07)">
-      <div class="stitle">Gekozen Visser</div>
-      <div style="font-family:var(--font);font-size:28px;font-weight:900;margin-bottom:12px">${escapeHtml(activeRow.naam)}</div>
-      <div class="fg">
-        <label class="lbl">Stek</label>
-        <input id="waterkant-stek" inputmode="numeric" value="${escapeHtmlAttr(activeRow.stek)}" placeholder="Bijvoorbeeld 12">
+  let activeHtml='';
+  if(activeRow){
+    const huidigVak=getVakNaamVoorVisser(activeRow.vid);
+    const gekozenVak=huidigVak || (activeRow.selected?'':(s.laatsteVak||''));
+    activeHtml=`
+    <div class="card inv-accent">
+      <div class="inv-kop">
+        <div class="inv-titel" style="margin:0">${escapeHtml(activeRow.naam)}</div>
+        <button class="btn btn-gh btn-sm" onclick="annuleerVisserInvoer()">✕ Andere</button>
       </div>
-      ${s.gebruiktVakken?`<div class="fg">
+      <div class="inv-velden">
+        <div>
+          <label class="lbl">Stek</label>
+          <input id="waterkant-stek" inputmode="numeric" enterkeyhint="next" value="${escapeHtmlAttr(activeRow.stek)}" placeholder="12" onkeydown="waterkantVeldEnter(event,'waterkant-gram')">
+        </div>
+        <div>
+          <label class="lbl">Grammen</label>
+          <input id="waterkant-gram" inputmode="decimal" enterkeyhint="done" value="${escapeHtmlAttr(activeRow.gewicht)}" placeholder="2450" onkeydown="waterkantVeldEnter(event)">
+        </div>
+      </div>
+      ${s.gebruiktVakken?`<div style="margin-top:12px">
         <label class="lbl">Vak</label>
-        <input id="waterkant-vak" list="waterkant-vak-opties" value="${escapeHtmlAttr(getVakNaamVoorVisser(activeRow.vid))}" placeholder="Typ of kies A t/m J">
-        <datalist id="waterkant-vak-opties">
-          ${['A','B','C','D','E','F','G','H','I','J'].map(letter=>`<option value="${letter}"></option>`).join('')}
-        </datalist>
+        <input type="hidden" id="waterkant-vak" value="${escapeHtmlAttr(gekozenVak)}">
+        <div class="inv-vakken" id="waterkant-vak-knoppen">
+          ${getInvoerVakLetters(gekozenVak).map(l=>`<button type="button" class="inv-vak${l===gekozenVak?' is-actief':''}" data-vak="${l}" onclick="kiesWaterkantVak('${l}')">${l}</button>`).join('')}
+        </div>
       </div>`:''}
-      <div class="fg">
-        <label class="lbl">Grammen</label>
-        <input id="waterkant-gram" inputmode="decimal" value="${escapeHtmlAttr(activeRow.gewicht)}" placeholder="Bijvoorbeeld 2450">
-      </div>
-      <div id="waterkant-err" class="err" style="display:none"></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div id="waterkant-err" class="err" style="display:none;margin:12px 0 0"></div>
+      <div class="inv-acties">
         <button class="btn btn-g" onclick="saveActieveVisser()">Opslaan en volgende</button>
-        <button class="btn btn-gh" onclick="annuleerVisserInvoer()">Annuleren</button>
       </div>
-    </div>`:'';
+    </div>`;
+  }
 
-  document.getElementById('invoer-form').innerHTML=`
+  const zoekHtml=activeRow?'':`
     <div class="card">
-      <div class="stitle">Uitslag Invoeren</div>
-      <div style="font-family:var(--font);font-size:30px;font-weight:900;margin-bottom:8px">${escapeHtml(w.naam)}</div>
-      <div class="sub">📅 ${escapeHtml(w.datum)}${getWedstrijdPlaats(w)?` · 📍 ${getWedstrijdPlaatsHtml(w)}`:''}</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
-        <span class="tag ${comp?.type==='serie'?'tag-s':'tag-l'}">${escapeHtml(compLabel)}</span>
-        <span class="tag ${w.isKoppel?'tag-k':'tag-l'}">${w.isKoppel?'Koppel':'Solo'}</span>
-        <span class="tag ${s.gebruiktVakken?'tag-s':'tag-l'}">${s.gebruiktVakken?'Vakken aan':'Geen vakken'}</span>
-      </div>
-    </div>
-    <div class="card">
-      <div class="stitle">Wedstrijdgegevens</div>
-      <div class="sub" style="margin-bottom:14px">Pas hier de wedstrijd aan. De uitslag hieronder kun je op dezelfde pagina blijven corrigeren.</div>
-      <div class="grid cols-2">
-        <div class="fg"><label class="lbl">Wedstrijdnaam</label><input id="biw-naam" value="${escapeHtmlAttr(w.naam||'')}" placeholder="Wedstrijdnaam"></div>
-        <div class="fg"><label class="lbl">Datum</label><input id="biw-datum" type="date" value="${escapeHtmlAttr(w.datum||'')}"></div>
-        <div class="fg"><label class="lbl">Competitie</label><select id="biw-competitie">${compOpts}</select></div>
-        <div class="fg"><label class="lbl">Type wedstrijd</label><select id="biw-koppel"><option value="0" ${w.isKoppel?'':'selected'}>Solo</option><option value="1" ${w.isKoppel?'selected':''}>Koppel</option></select></div>
-        <div class="fg"><label class="lbl">Serie wedstrijd #</label><input id="biw-serienummer" type="number" min="1" step="1" value="${escapeHtmlAttr(serieNummer)}" placeholder="Alleen bij serie"></div>
-        <div class="fg"><label class="lbl">Water</label><input id="biw-water" value="${escapeHtmlAttr(w.water||'')}" placeholder="Bijvoorbeeld Binnenmaas"></div>
-        <div class="fg"><label class="lbl">Verzamellocatie</label><input id="biw-locatie" value="${escapeHtmlAttr(w.locatie||'')}" placeholder="Adres of locatie voor loting"></div>
-        <div class="fg"><label class="lbl">Lotingtijd</label><input id="biw-verzamelen" value="${escapeHtmlAttr(w.verzamelen||'')}" placeholder="Bijvoorbeeld 06:30"></div>
-        <div class="fg"><label class="lbl">Starttijd</label><input id="biw-starttijd" value="${escapeHtmlAttr(w.starttijd||'')}" placeholder="Bijvoorbeeld 08:30"></div>
-        <div class="fg"><label class="lbl">Eindtijd</label><input id="biw-eindtijd" value="${escapeHtmlAttr(w.eindtijd||'')}" placeholder="Bijvoorbeeld 14:00"></div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-        <button class="btn btn-g btn-sm" onclick="saveWedInfoFromInvoer('${w.id}')">Wedstrijdgegevens opslaan</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="stitle">Zoek Deelnemer</div>
-      <input id="waterkant-zoek" value="${escapeHtmlAttr(s.zoek||'')}" placeholder="Typ bijvoorbeeld Jaa of Groot" oninput="setInvoerZoek(this.value)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="margin-bottom:12px">
-      <div class="sub" style="margin-bottom:12px">Zoek een visser, klik de naam aan, vul daarna stek${s.gebruiktVakken?', vak':''} en grammen in.</div>
+      <div class="stitle">Visser kiezen</div>
+      <input id="waterkant-zoek" class="inv-zoek" type="search" enterkeyhint="search" value="${escapeHtmlAttr(s.zoek||'')}" placeholder="Typ een naam, bijv. Jaa of Groot" oninput="setInvoerZoek(this.value)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
       <div id="waterkant-resultaten">${renderWaterkantResultatenHtml()}</div>
-    </div>
+    </div>`;
+
+  const vakTelling=getInvoerVakTelling(ingevoerd);
+  document.getElementById('invoer-form').innerHTML=`
+    <details class="card inv-details">
+      <summary>
+        <span style="min-width:0">
+          <span class="inv-kop-naam" style="display:block">${escapeHtml(w.naam)}</span>
+          <span class="inv-kop-sub" style="display:block;text-transform:none;letter-spacing:0;font-family:'Barlow',sans-serif;font-weight:400">${kopSub}</span>
+        </span>
+        <span style="font-size:12px;white-space:nowrap">Wijzigen</span>
+      </summary>
+      <div class="inv-details-inhoud">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <span class="tag ${comp?.type==='serie'?'tag-s':'tag-l'}">${escapeHtml(compLabel)}</span>
+          <span class="tag ${w.isKoppel?'tag-k':'tag-l'}">${w.isKoppel?'Koppel':'Solo'}</span>
+          <span class="tag ${s.gebruiktVakken?'tag-s':'tag-l'}">${s.gebruiktVakken?'Vakken aan':'Geen vakken'}</span>
+        </div>
+        <div class="inv-keuze-label">Vakken</div>
+        <div class="inv-keuze" style="margin-bottom:14px">
+          <button type="button" class="inv-vak${s.gebruiktVakken?'':' is-actief'}" style="font-size:15px" onclick="zetInvoerVakken(false)">Zonder vakken</button>
+          <button type="button" class="inv-vak${s.gebruiktVakken?' is-actief':''}" style="font-size:15px" onclick="zetInvoerVakken(true)">Met vakken</button>
+        </div>
+        <div class="grid cols-2">
+          <div class="fg"><label class="lbl">Wedstrijdnaam</label><input id="biw-naam" value="${escapeHtmlAttr(w.naam||'')}" placeholder="Wedstrijdnaam"></div>
+          <div class="fg"><label class="lbl">Datum</label><input id="biw-datum" type="date" value="${escapeHtmlAttr(w.datum||'')}"></div>
+          <div class="fg"><label class="lbl">Competitie</label><select id="biw-competitie">${compOpts}</select></div>
+          <div class="fg"><label class="lbl">Type wedstrijd</label><select id="biw-koppel"><option value="0" ${w.isKoppel?'':'selected'}>Solo</option><option value="1" ${w.isKoppel?'selected':''}>Koppel</option></select></div>
+          <div class="fg"><label class="lbl">Serie wedstrijd #</label><input id="biw-serienummer" type="number" min="1" step="1" value="${escapeHtmlAttr(serieNummer)}" placeholder="Alleen bij serie"></div>
+          <div class="fg"><label class="lbl">Water</label><input id="biw-water" value="${escapeHtmlAttr(w.water||'')}" placeholder="Bijvoorbeeld Binnenmaas"></div>
+          <div class="fg"><label class="lbl">Verzamellocatie</label><input id="biw-locatie" value="${escapeHtmlAttr(w.locatie||'')}" placeholder="Adres of locatie voor loting"></div>
+          <div class="fg"><label class="lbl">Lotingtijd</label><input id="biw-verzamelen" value="${escapeHtmlAttr(w.verzamelen||'')}" placeholder="Bijvoorbeeld 06:30"></div>
+          <div class="fg"><label class="lbl">Starttijd</label><input id="biw-starttijd" value="${escapeHtmlAttr(w.starttijd||'')}" placeholder="Bijvoorbeeld 08:30"></div>
+          <div class="fg"><label class="lbl">Eindtijd</label><input id="biw-eindtijd" value="${escapeHtmlAttr(w.eindtijd||'')}" placeholder="Bijvoorbeeld 14:00"></div>
+        </div>
+        <button class="btn btn-g btn-sm" style="margin-top:6px" onclick="saveWedInfoFromInvoer('${w.id}')">Wedstrijdgegevens opslaan</button>
+      </div>
+    </details>
     ${activeHtml}
+    ${zoekHtml}
     <div class="card">
-      <div class="stitle">Al Ingevoerd</div>
-      <div class="sub" style="margin-bottom:12px">${ingevoerd.length} deelnemer(s) ingevoerd</div>
-      ${renderWaterkantIngevoerdeHtml()}
+      <div class="inv-lijst-kop">
+        <div class="stitle">${activeRow?'Laatst ingevoerd':'Al ingevoerd'}</div>
+        <div class="inv-lijst-telling">${vakTelling}</div>
+      </div>
+      ${renderWaterkantIngevoerdeHtml(activeRow?3:0)}
     </div>
-    <div class="card">
-      <div class="stitle">Afronden</div>
-      <div class="sub" style="margin-bottom:12px">Als alles akkoord is, ga je eerst naar een totaaloverzicht en kun je daar nog bewerken.</div>
-      <button class="btn btn-g" style="min-width:240px" onclick="toonInvoerOverzicht()" id="opslaan-btn">${lotingGroups.length?'Naar loting':'Naar overzicht'}</button>
+    <div class="inv-balk">
+      <span class="inv-balk-telling"><b>${ingevoerd.length}</b>ingevoerd</span>
+      <button class="btn btn-g" onclick="toonInvoerOverzicht()">Naar controle →</button>
     </div>`;
 }
 
