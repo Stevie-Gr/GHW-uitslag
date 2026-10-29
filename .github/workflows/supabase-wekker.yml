@@ -7,6 +7,9 @@ on:
     - cron: '17 6 */3 * *'
   workflow_dispatch:
 
+permissions:
+  actions: write
+
 jobs:
   wekker:
     runs-on: ubuntu-latest
@@ -16,3 +19,13 @@ jobs:
           curl --fail --silent --show-error \
             -H "apikey: sb_publishable_xFwxWzzSzgieB-NkftM1IQ_aVjFuv7Y" \
             "https://nvputjtfxwefeowstoxv.supabase.co/rest/v1/app_state?select=version&id=eq.1"
+
+      # GitHub zet geplande workflows uit na 60 dagen zonder commits; opnieuw aanzetten reset die teller.
+      - name: Wekker zelf actief houden
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail --silent --show-error -X PUT \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/supabase-wekker.yml/enable"
