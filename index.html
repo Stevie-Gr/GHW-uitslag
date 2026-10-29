@@ -1783,7 +1783,7 @@ let nieuwsFotoDataUrl = '';
 let nieuwsDraftState = null;
 let nieuwsRawFotoDataUrl = '';
 let nieuwsCropImageInfo = null;
-let nieuwsCropState = { zoom:1, x:0, y:0 };
+let nieuwsCropState = { zoom:1, x:0, y:0, heel:false };
 let nieuwsCropDirty = false;
 let visweekPubliekEditieId = null;
 let visweekPubliekModus = 'dag';
@@ -10761,7 +10761,7 @@ function getNieuwsFormValues(){
 }
 
 function resetNieuwsCropState(){
-  nieuwsCropState={ zoom:1, x:0, y:0 };
+  nieuwsCropState={ zoom:1, x:0, y:0, heel:false };
 }
 
 function loadNieuwsCropImageInfo(url, rerender=true){
@@ -10804,15 +10804,20 @@ function getNieuwsCropImageStyle(){
 
 function renderNieuwsCropEditor(){
   if(!nieuwsRawFotoDataUrl) return '';
-  const style=getNieuwsCropImageStyle();
+  const heel=!!nieuwsCropState.heel;
+  // Hele foto: volledige foto in het 16:9-kader, zijkanten gevuld met een vervaagde kopie
+  const stageHtml=heel
+    ? `<div class="nieuws-crop-image" style="inset:-8%;background-size:cover;background-image:url('${nieuwsRawFotoDataUrl}');filter:blur(18px) brightness(.55)"></div>
+       <div class="nieuws-crop-image" style="inset:0;background-size:contain;background-image:url('${nieuwsRawFotoDataUrl}')"></div>`
+    : `<div class="nieuws-crop-image" style="${getNieuwsCropImageStyle()}"></div>`;
   return `
     <div class="nieuws-crop-card">
       <div class="stitle" style="margin-bottom:10px">Foto bijsnijden voor website</div>
-      <div class="sub" style="margin-bottom:12px">Vaste 16:9 uitsnede voor home, overzicht en mobiel. Zet de foto goed in beeld en sla daarna de uitsnede op.</div>
+      <div class="sub" style="margin-bottom:12px">Vaste 16:9 uitsnede voor home, overzicht en mobiel. Zet de foto goed in beeld en sla daarna de uitsnede op. Staande foto? Kies "Hele foto tonen".</div>
       <div class="nieuws-crop-stage">
-        <div class="nieuws-crop-image" style="${style}"></div>
+        ${stageHtml}
       </div>
-      <div class="nieuws-crop-grid">
+      <div class="nieuws-crop-grid" style="${heel?'display:none':''}">
         <div class="nieuws-crop-field">
           <label>Zoom</label>
           <input type="range" min="100" max="300" step="1" value="${Math.round((nieuwsCropState.zoom||1)*100)}" oninput="updateNieuwsCropState('zoom',this.value)">
@@ -10831,9 +10836,16 @@ function renderNieuwsCropEditor(){
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
         <button class="btn btn-g" onclick="applyNieuwsCrop()">Gebruik uitsnede</button>
+        <button class="btn btn-gh" onclick="toggleNieuwsHeleFoto()">${heel?'Bijsnijden':'Hele foto tonen'}</button>
         <button class="btn btn-gh" onclick="resetNieuwsCropEditor()">Reset kader</button>
       </div>
     </div>`;
+}
+
+function toggleNieuwsHeleFoto(){
+  nieuwsCropState.heel=!nieuwsCropState.heel;
+  nieuwsCropDirty=true;
+  renderBeheer();
 }
 
 function updateNieuwsCropState(field, value){
@@ -10862,6 +10874,27 @@ function applyNieuwsCrop(){
   img.onload=()=>{
     const outputW=1600;
     const outputH=900;
+    if(nieuwsCropState.heel){
+      const canvas=document.createElement('canvas');
+      canvas.width=outputW;
+      canvas.height=outputH;
+      const ctx=canvas.getContext('2d');
+      const cover=Math.max(outputW/img.naturalWidth, outputH/img.naturalHeight)*1.1;
+      const bgW=img.naturalWidth*cover, bgH=img.naturalHeight*cover;
+      ctx.filter='blur(30px)';
+      ctx.drawImage(img,(outputW-bgW)/2,(outputH-bgH)/2,bgW,bgH);
+      ctx.filter='none';
+      ctx.fillStyle='rgba(10,17,24,.45)';
+      ctx.fillRect(0,0,outputW,outputH);
+      const fit=Math.min(outputW/img.naturalWidth, outputH/img.naturalHeight);
+      const fgW=img.naturalWidth*fit, fgH=img.naturalHeight*fit;
+      ctx.drawImage(img,(outputW-fgW)/2,(outputH-fgH)/2,fgW,fgH);
+      nieuwsFotoDataUrl=canvas.toDataURL('image/jpeg',0.92);
+      nieuwsDraftState={...(nieuwsDraftState||getNieuwsFormValues()), foto:nieuwsFotoDataUrl};
+      nieuwsCropDirty=false;
+      renderBeheer();
+      return;
+    }
     const baseScale=Math.max(outputW/img.naturalWidth, outputH/img.naturalHeight);
     const scaledW=img.naturalWidth*baseScale*nieuwsCropState.zoom;
     const scaledH=img.naturalHeight*baseScale*nieuwsCropState.zoom;
