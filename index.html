@@ -880,6 +880,24 @@ body[data-page="nieuws"] .topbar-title{color:var(--accent-news)}
   line-height:1.6;
 }
 /* Startpagina: kop met achtergrond, uitslag + agenda, kanjer + nieuws */
+.welcome-dashboard{position:relative;isolation:isolate}
+/* De waterillustratie loopt vervaagd door achter de kaarten */
+.welcome-dashboard::before{
+  content:'';
+  position:absolute;
+  z-index:-1;
+  left:0;
+  right:0;
+  top:120px;
+  height:min(1100px,calc(100% - 60px));
+  border-radius:40px;
+  background:url('achtergrond-water.jpg') 70% 40%/cover no-repeat;
+  opacity:.6;
+  filter:blur(18px) saturate(1.2);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 55%,transparent 100%);
+  mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 55%,transparent 100%);
+  pointer-events:none;
+}
 .wh-hero{
   position:relative;
   min-height:230px;
@@ -889,7 +907,7 @@ body[data-page="nieuws"] .topbar-title{color:var(--accent-news)}
   border-radius:20px;
   overflow:hidden;
   border:1px solid rgba(255,255,255,.08);
-  background:#0b1822 url('achtergrond-water.svg') center/cover no-repeat;
+  background:#0b1822 url('achtergrond-water.jpg') center/cover no-repeat;
   box-shadow:0 14px 34px rgba(0,0,0,.28);
 }
 .wh-hero::before{
@@ -933,9 +951,11 @@ body[data-page="nieuws"] .topbar-title{color:var(--accent-news)}
   flex-direction:column;
   padding:22px;
   border-radius:18px;
-  background:linear-gradient(180deg,rgba(19,34,46,.95),rgba(11,21,30,.98));
-  border:1px solid rgba(119,210,181,.14);
-  box-shadow:0 12px 30px rgba(0,0,0,.24);
+  background:linear-gradient(180deg,rgba(24,34,48,.74),rgba(12,20,30,.86));
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,226,196,.10);
+  box-shadow:inset 0 1px 0 rgba(255,228,200,.07),0 12px 30px rgba(0,0,0,.24);
 }
 .wh-label{
   color:var(--g);
@@ -1056,8 +1076,10 @@ body[data-page="nieuws"] .topbar-title{color:var(--accent-news)}
   cursor:pointer;
   text-align:left;
   color:var(--text);
-  background:linear-gradient(180deg,rgba(19,34,46,.95),rgba(11,21,30,.98));
-  border:1px solid rgba(119,210,181,.14);
+  background:linear-gradient(180deg,rgba(24,34,48,.74),rgba(12,20,30,.86));
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,226,196,.10);
   font-family:var(--font);
   font-size:20px;
   font-weight:700;
