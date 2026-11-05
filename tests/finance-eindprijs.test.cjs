@@ -66,4 +66,13 @@ d.competities[0].telBeste=3;o=C.seriesOverview(d,p);
 assert.equal(g('f').group,'serie');assert.equal(o.rows.find(r=>r.vid==='f').reach,false);/* paid but can no longer reach 3 */
 assert.equal(o.prizes.sureN,0);
 d.competities[0].telBeste=2;
+// Same series for everybody: the competition name wins over a different agenda name (fresh browser == old browser).
+{const e={vissers:[{id:'a',naam:'A'}],competities:[{id:'c1',naam:'Herfst Serie 2026',type:'serie',telBeste:2,seizoen:'2026',vissers:['a']}],
+ wedstrijden:[{id:'m1',naam:'Herfst Serie 2026 wedstrijd 1',datum:'2026-10-03',competitieId:'c1'},{id:'m2',naam:'Herfst Serie 2026 wedstrijd 2',datum:'2026-10-10',competitieId:'c1'}],
+ uitslagen:[{wedstrijdId:'m1',visserId:'a'},{wedstrijdId:'m2',visserId:'a'}],
+ roosterItems:[{id:'r1',type:'wedstrijd',datum:'2026-10-03',titel:'Herfstserie · Water',wedstrijdVorm:'serie',serieNaam:'Herfstserie',gekoppeldeWedstrijdId:'m1'},{id:'r2',type:'wedstrijd',datum:'2026-10-10',titel:'Herfstserie · Water',wedstrijdVorm:'serie',serieNaam:'Herfstserie',gekoppeldeWedstrijdId:'m2'}],
+ finance:{version:3,years:{2026:{budget:0}},entries:[]}};
+ C.sync(e);const posts=e.finance.entries.filter(x=>x.kind==='series');
+ assert.equal(posts.length,1);assert.equal(posts[0].title,'Herfst Serie 2026');assert.equal(posts[0].children.length,2);
+ assert.equal(C.seriesOverview(e,posts[0]).matches,2);}
 console.log('PASS: eindprijs reasons (ja/los/onbetaald/geen keuze/nog open/te weinig), prize pot vs loose pot, explicit loose ticks, neutral loose payout in the year result, one-time migration');
