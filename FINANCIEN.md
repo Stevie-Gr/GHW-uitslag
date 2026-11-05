@@ -14,7 +14,7 @@ Deze uitbreiding draait lokaal op de vertrouwde pc. Open index.html in dezelfde 
 
 Financiën is bewust klein gehouden: één scherm met drie dingen.
 
-- **Resultaat**: bovenaan groot en gekleurd (groen = over, rood = tekort), met daaronder het rekenstaatje: + Begroting vereniging · + Extra bijdrage · + Inleg vissers · + Losse inleg series · − Uitgaven (prijzengeld en kosten) · = Resultaat. *Inleg* rekent de app zelf uit: deelnemers uit de uitslagen × tarief, min wie nog niet betaald heeft; losse inleg in series staat apart. *Uitgaven* is per wedstrijd het uitbetaalde prijzengeld (standaard de prijzenpot = inleg + begroot) en per uitgave het uitgegeven bedrag (standaard begroot). Het resultaat geldt voor het hele jaar: wat nog komt telt als begroot. Onder het staatje: *Begroot t/m vandaag* en *heel jaar*.
+- **Resultaat**: bovenaan groot en gekleurd (groen = over, rood = tekort), met daaronder het rekenstaatje: + Begroting vereniging · + Extra bijdrage · + Inleg vissers · + Losse inleg series (aparte pot) · − Uitgaven (prijzengeld, uitbetaling losse pot en kosten) · = Resultaat. *Inleg* rekent de app zelf uit: deelnemers uit de uitslagen × tarief, min wie nog niet betaald heeft; losse inleg in series staat apart. *Uitgaven* is per wedstrijd het uitbetaalde prijzengeld (standaard de prijzenpot = inleg + begroot) en per uitgave het uitgegeven bedrag (standaard begroot). Het resultaat geldt voor het hele jaar: wat nog komt telt als begroot. Onder het staatje: *Begroot t/m vandaag* en *heel jaar*.
 - **Lijst van wedstrijden en uitgaven** met datum, vorm, water, lotingplek, tijden, inleg, begroot en uitgegeven (vet als je het zelf hebt ingevuld). Een serie staat als één regel op de datum van haar eerste wedstrijd; de wedstrijden zitten erachter.
 - **Nog niet betaald**: wie nog moet betalen, met bedrag en knop *Alsnog betaald*. Bij series ook hoeveel vissers nog *serie of los* moeten kiezen.
 
@@ -27,13 +27,21 @@ Per post zie je Inleg · Begroot · Prijzenpot · Uitbetaald · Verschil en kun 
 - Uitzonderingen noteer je bij de invoer (deelnemerslijst, paneel *Inschrijfgeld*) of bij de wedstrijd in Financiën: **Nog niet betaald**. Ze verschijnen in de kaart *Nog niet betaald*.
 - Iedereen met invoerrechten mag dit zetten; bedragen en begroting blijven alleen zichtbaar voor wie toegang tot Financiën heeft.
 
+## Serie: twee potten en de eindprijs
+
+- **Seriepot** = bijdrage vereniging + betaalde serietarieven (normaal en AOW). Daar komen de eindprijzen uit. Losse inleg zit hier niet in.
+- **Losse-inleg pot** = losse inleg die je per visser per wedstrijd hebt afgevinkt (normaal en AOW apart). Dit is een aparte pot; je vult zelf in wat je eruit uitbetaalt (standaard gelijk aan de pot, dus neutraal voor het jaarresultaat).
+- **Losse inleg is standaard open** en telt pas mee als je *Betaald* aanvinkt (in het tabblad Financiën bij de serie, of in het inschrijfgeld-paneel bij de invoer). Bij bestaande series is wat voorheen als betaald gold eenmalig als betaald overgenomen.
+- **Eindprijs**: een visser komt in aanmerking als hij *Serie* heeft gekozen, *Serie betaald* is aangevinkt en minimaal *beste X* wedstrijden van de serie heeft gevist. Wie niet in aanmerking komt blijft in de stand staan; de prijzen gaan op volgorde naar de gerechtigden.
+- **Tabblad Financiën bij de serie** (alleen zichtbaar voor beheerders met toegang tot financiën): totale opbrengst, beide potten, tellers per groep (✓ serie betaald, ! serie open, – los, ? kies nog) en per visser de keuze, betaling en eindprijs-status. De stand voor bezoekers verandert niet.
+
 ## Series
 
 Een serie heeft één begroot bedrag en vier tarieven: los, los AOW, hele serie, hele serie AOW.
 
 - Bij de eerste uitslag van een serie kies je per visser **Serie** of **Los** (rood tot gekozen; ook te doen bij de serie in Financiën).
 - **Serie**: het serietarief staat open tot je *Serie betaald* aanvinkt; dat geldt voor alle wedstrijden van de serie. Altijd het volledige tarief, ook bij late instroom of bij overstap van los naar serie.
-- **Los**: telt per wedstrijd als betaald tegen het losse tarief; uitzondering *Nog niet betaald*.
+- **Los**: per wedstrijd het losse tarief; telt pas mee als je het afvinkt (zie *Serie: twee potten en de eindprijs*).
 - **AOW**: vinkje *AOW-tarief* bij de visser in vissersbeheer. De app kiest dan zelf het AOW-tarief; bij de naam staat een AOW-label.
 
 Geen deelbetalingen en geen betaalwijze: de app registreert begroot, inleg (automatisch), uitbetaald en wie nog moet betalen.
@@ -84,6 +92,8 @@ Online publiceren, gedeelde opslag en een koppeling met MijnHSV zijn uitgesteld.
 - `node tests/finance-core.test.cjs`: schoon beginnen, betaald-tenzij, koppeleenheden, alleen-visser, serie kiezen/bevestigen, AOW-tarieven, los→serie, samenvatting begroot/werkelijk/over.
 - `node tests/finance-plan.test.cjs` en `node tests/finance-plan-ui.test.cjs`: jaarplanning met twee bladen, weinig verplichte velden, seriebedragen op een willekeurige regel, automatische namen, viswater-standaardwaarden, budgetcellen, begrotingshints 2026, herkenning op datum/vorm/water, alle fouten tegelijk, oude kolomnamen, voorstel voor een volgend jaar.
 - `node tests/finance-ui.test.cjs` en `node tests/finance-series-ui.test.cjs`: geïsoleerde Edge-tests (Playwright, eerst via npm, anders de lokaal gebundelde runtime) van startkaart, upload, kopregel, invoerpaneel, openstaand, werkelijk-bedrag, AOW-vinkje, migratie en series.
+- `node tests/finance-eindprijs.test.cjs`: eindprijs-regel, seriepot tegenover losse pot, losse inleg afvinken, eenmalige overgang.
+- `node tests/finance-serie-tab-ui.test.cjs`: tabblad Financiën op 360 px (alleen voor beheerders, serie/los, betaald, potten, eindprijs-ster, tikvlakken).
 - `node tests/finance-duplicates.test.cjs` en `node tests/finance-duplicates-ui.test.cjs`: dubbele wedstrijden.
 
 ## Mogelijk dubbele wedstrijden controleren
