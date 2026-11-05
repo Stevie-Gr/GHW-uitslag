@@ -59,9 +59,9 @@ const g=v=>o.rows.find(r=>r.vid===v);
 assert.equal(g('a').group,'serie');assert.equal(g('b').group,'serie');assert.equal(g('f').group,'serie');
 assert.equal(g('c').group,'kans');/* loose now, but 2 of 3 matches fished: can still reach 2 */
 assert.equal(o.groups.serie+o.groups.kans+o.groups.los,o.rows.length);
-assert.equal(o.prizes.sureN,1);/* only a: paid and enough matches */
+assert.equal(o.prizes.sureN,2);/* a and b: serie and enough matches; payment is separate */
 assert(o.prizes.maxN>=o.prizes.sureN);assert(o.prizes.potMax>=o.prizes.potSure);
-assert.equal(o.prizes.potSure,6100);
+assert.equal(o.prizes.potSure,6100+o.rows.find(r=>r.vid==='b').fee);/* unpaid sure fishers' fees join the pot */
 d.competities[0].telBeste=3;o=C.seriesOverview(d,p);
 assert.equal(g('f').group,'serie');assert.equal(o.rows.find(r=>r.vid==='f').reach,false);/* paid but can no longer reach 3 */
 assert.equal(o.prizes.sureN,0);
@@ -69,12 +69,12 @@ d.competities[0].telBeste=2;
 // Next match: signing up counts as "will reach", but only for the very next match; stale sign-ups expire.
 d.competities[0].telBeste=2;p.opgave={};
 let o2=C.seriesOverview(d,p);
-assert.equal(o2.played,2);assert.equal(o2.toGo,1);assert.equal(o2.next,3);assert.equal(o2.prizes.sureN,1);assert.equal(o2.prizes.expN,2);/* a (paid) and b (unpaid, but enough matches): both count; f needs the next match *//* only a is there */
+assert.equal(o2.played,2);assert.equal(o2.toGo,1);assert.equal(o2.next,3);assert.equal(o2.prizes.sureN,2);assert.equal(o2.prizes.expN,2);/* a (paid) and b (unpaid, but enough matches): both count; f needs the next match *//* only a is there */
 p.opgave={f:3};o2=C.seriesOverview(d,p);
 assert.equal(o2.rows.find(r=>r.vid==='f').signed,true);assert.equal(o2.rows.find(r=>r.vid==='f').projected,2);
-assert.equal(o2.prizes.sureN,1);assert.equal(o2.prizes.expN,3);/* f: 1 fished + signed for the next one = 2 */
+assert.equal(o2.prizes.sureN,2);assert.equal(o2.prizes.expN,3);/* f: 1 fished + signed for the next one = 2 */
 p.opgave={f:3};delete p.seriesPaid.f;o2=C.seriesOverview(d,p);
-assert.equal(o2.prizes.expN,3);assert.equal(o2.prizes.sureN,1);const fee=r=>o2.rows.find(x=>x.vid===r).fee;assert.equal(o2.prizes.potExp,o2.prizes.potSure+fee('b')+fee('f'));/* unpaid fees join the Verwacht pot */
+assert.equal(o2.prizes.expN,3);assert.equal(o2.prizes.sureN,2);const fee=r=>o2.rows.find(x=>x.vid===r).fee;assert.equal(o2.prizes.potExp,o2.prizes.potSure+fee('f'));/* unpaid fees join the Verwacht pot */
 p.seriesPaid.f=true;
 p.opgave={f:2};o2=C.seriesOverview(d,p);assert.equal(o2.rows.find(r=>r.vid==='f').signed,false);assert.equal(o2.prizes.expN,2);/* sign-up for an older match is ignored */
 // Series total: "still to go" follows the total, not the number of planned matches.
