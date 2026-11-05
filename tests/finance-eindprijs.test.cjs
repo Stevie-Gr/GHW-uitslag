@@ -88,4 +88,15 @@ p.totalMatches=0;d.competities[0].telBeste=2;
  C.sync(e);const posts=e.finance.entries.filter(x=>x.kind==='series');
  assert.equal(posts.length,1);assert.equal(posts[0].title,'Herfst Serie 2026');assert.equal(posts[0].children.length,2);
  assert.equal(C.seriesOverview(e,posts[0]).matches,2);}
+// Legacy duplicate: two entries for the same match must not both count (loose payments would be doubled).
+{const e={vissers:[{id:'a',naam:'A'}],competities:[{id:'c1',naam:'Herfst Serie 2026',type:'serie',telBeste:2,seizoen:'2026',vissers:['a']}],
+ wedstrijden:[{id:'m1',naam:'Herfst Serie 2026 wedstrijd 1',datum:'2026-10-03',competitieId:'c1'},{id:'m2',naam:'Herfst Serie 2026 wedstrijd 2',datum:'2026-10-10',competitieId:'c1'}],
+ uitslagen:[{wedstrijdId:'m1',visserId:'a'},{wedstrijdId:'m2',visserId:'a'}],
+ roosterItems:[{id:'r2',type:'wedstrijd',datum:'2026-10-10',titel:'Herfstserie',wedstrijdVorm:'serie',serieNaam:'Herfstserie',gekoppeldeWedstrijdId:'m2'}],
+ finance:{version:3,years:{2026:{budget:0}},entries:[]}};
+ C.sync(e);const orig=e.finance.entries.find(x=>x.matchId==='m2');
+ const dup=JSON.parse(JSON.stringify(orig));dup.id='match-m2';delete dup.agendaId;e.finance.entries.push(dup);
+ C.sync(e);const post=e.finance.entries.find(x=>x.kind==='series');
+ assert.equal(post.children.length,2);assert.equal(e.finance.entries.filter(x=>x.seriesId===post.id&&x.matchId==='m2').length,1);
+ assert.equal(C.seriesOverview(e,post).matches,2);assert.equal(e.finance.entries.find(x=>x.id==='match-m2').seriesId,undefined);}
 console.log('PASS: eindprijs reasons (ja/los/onbetaald/geen keuze/nog open/te weinig), prize pot vs loose pot, explicit loose ticks, neutral loose payout in the year result, one-time migration');
