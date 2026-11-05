@@ -111,4 +111,4 @@ Na koppelen bevat de volgende jaarplanning één regel voor dat paar. Uitslagen,
 Controles: `node tests/finance-duplicates.test.cjs` en `node tests/finance-duplicates-ui.test.cjs`.
 
 ## Overzicht (vereenvoudigd)
-Bovenaan één samenvatting (wedstrijd X van Y, serievissers, kans op prijs, seriepot). Prijzen staan achter de knop "Prijzen" (standaard Verwacht). Eén rij per visser met label Zeker / Kan nog / Valt af en een schakelaar "Komt?" voor de volgende wedstrijd; losse deelname staat ingeklapt. Het tabblad "Volgende wedstrijd" is vervallen.
+Bovenaan één samenvatting (wedstrijd X van Y, serievissers, kans op prijs, seriepot). Prijzen staan achter de knop "Prijzen" (standaard Verwacht). Eén rij per visser met label Zeker / Kan nog / Valt af en een schakelaar "Niet aangemeld" voor de volgende wedstrijd; losse deelname staat ingeklapt. Het tabblad "Volgende wedstrijd" is vervallen.

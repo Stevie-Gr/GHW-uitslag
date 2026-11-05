@@ -75,7 +75,7 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   const sw=n=>row(n).locator('.fs-chk');
   await sw('Dirk Jansen').click();
   assert.equal(await page.evaluate(()=>window.__db.serie_opgave.length),1);
-  assert(nl(await row('Dirk Jansen').innerText()).includes('→ 2/2'));assert(nl(await row('Dirk Jansen').innerText()).includes('✓ Komt'));
+  assert(nl(await row('Dirk Jansen').innerText()).includes('→ 2/2'));assert(nl(await row('Dirk Jansen').innerText()).includes('Aangemeld'));
   await sw('Dirk Jansen').click();assert.equal(await page.evaluate(()=>window.__db.serie_opgave.length),0);/* toggles off again */
   await sw('Dirk Jansen').click();
   await page.locator('.fs-prizes .btn',{hasText:'Verwacht'}).click();
