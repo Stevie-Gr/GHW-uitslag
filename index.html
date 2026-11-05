@@ -1019,6 +1019,7 @@ body[data-page="nieuws"] .topbar-title{color:var(--accent-news)}
   letter-spacing:1.4px;
   text-transform:uppercase;
 }
+.wh-links{display:flex;flex-wrap:wrap;gap:4px 22px;margin-top:auto}.wh-links .wh-link{margin-top:0}
 .wh-link span{display:inline-block;margin-left:6px;transition:transform .15s}
 .wh-link:hover span{transform:translateX(3px)}
 .wh-datum{
@@ -3670,6 +3671,11 @@ function getKanjerDeelnemerData(visserId,d){
   };
 }
 
+function serieStandNaam(serieId,d){
+  d=d||getData();
+  const gespeeld=d.wedstrijden.filter(w=>w.competitieId===serieId&&d.uitslagen.some(u=>u.wedstrijdId===w.id&&!u.afwezig)).length;
+  return gespeeld>=6?'Eindstand':'Tussenstand';
+}
 function getMeestRecenteWedstrijd(d){
   return [...d.wedstrijden]
     .filter(w=>isWedstrijdGevist(w.id,d))
@@ -3868,7 +3874,10 @@ function renderWelcomeDashboard(){
       <div class="welcome-podium">
         ${welcomePodiumHtml(recentTop3.map((entry,index)=>({rank:entry.displayRank||index+1,naam:entry.naam,gewicht:entry.gewicht})),'Nog geen uitslag beschikbaar voor deze wedstrijd.')}
       </div>
-      <button class="wh-link" onclick="openWelcomeWedstrijd('${meestRecent.id}')">Bekijk volledige uitslag <span aria-hidden="true">→</span></button>
+      <div class="wh-links">
+        <button class="wh-link" onclick="openWelcomeWedstrijd('${meestRecent.id}')">Volledige uitslag <span aria-hidden="true">→</span></button>
+        ${recentComp?.type==='serie'?`<button class="wh-link" onclick="nav('serie',false);showSerieDetail('${recentComp.id}','punten',false)">${serieStandNaam(recentComp.id,d)} <span aria-hidden="true">→</span></button>`:''}
+      </div>
     </section>`:`
     <section class="wh-kaart wh-uitslag">
       <div class="wh-label">Meest recente uitslag</div>
@@ -4221,7 +4230,7 @@ function renderSerieTab(serieId, tab, addToHistory=true){
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">
       <button class="btn ${tab==='uitslagen'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','uitslagen')" style="flex:1 1 140px;padding:12px 18px;min-height:44px;font-size:14px">Uitslagen</button>
-      <button class="btn ${tab==='punten'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','punten')" style="flex:1 1 140px;padding:12px 18px;min-height:44px;font-size:14px">Puntenstand</button>
+      <button class="btn ${tab==='punten'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','punten')" style="flex:1 1 140px;padding:12px 18px;min-height:44px;font-size:14px">${serieStandNaam(serieId,d)}</button>
       ${(window.Finance&&Finance.serieAllowed())?`<button class="btn ${tab==='financien'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','financien')" style="flex:1 1 140px;padding:12px 18px;min-height:44px;font-size:14px">Financiën</button>`:''}
     </div>`;
 
@@ -4571,7 +4580,10 @@ function bouwWedstrijdDetail(w, d, onTerug, isSerie){
 
   const lbl=comp?.naam==='__los__'?'Losse wedstrijd':(comp?.naam||'');
   return `
-    <button class="btn btn-gh btn-sm inline-back" style="margin-bottom:16px" onclick="${terugFn}">&larr; Terug</button>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+      <button class="btn btn-gh btn-sm inline-back" style="margin-bottom:0" onclick="${terugFn}">&larr; Terug</button>
+      ${isSerie&&comp?.type==='serie'?`<button class="btn btn-g btn-sm" style="margin-bottom:0" onclick="showSerieDetail('${comp.id}','punten')">${serieStandNaam(comp.id,d)} &rarr;</button>`:''}
+    </div>
     <div class="card" style="margin-bottom:18px">
       <div style="margin-bottom:6px">
         <span class="tag ${comp?.type==='serie'?'tag-s':'tag-l'}">${lbl}</span>
