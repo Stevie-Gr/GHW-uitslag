@@ -78,7 +78,7 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   await sw('Dirk Jansen').click();assert.equal(await page.evaluate(()=>window.__db.serie_opgave.length),0);/* toggles off again */
   await sw('Dirk Jansen').click();
   await page.locator('.fs-prizes .btn',{hasText:'Verwacht'}).click();
-  assert(nl(await page.locator('.fs-prizes').innerText()).toLowerCase().includes('verwacht · 1'));/* only Jan is paid; Dirk is signed up but has not paid */
+  assert(nl(await page.locator('.fs-prizes').innerText()).toLowerCase().includes('verwacht · 2'));/* Jan (paid) and Piet (serie, unpaid but enough matches); Dirk has not chosen serie */
   // Phone layout: nothing wider than the screen, tap targets at least 44px high.
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
   const small=await page.evaluate(()=>[...document.querySelectorAll('.fs-main,.fs-seg .btn,.fs-pay,.fs-wk,.fs-fold')].filter(e=>e.offsetParent&&e.getBoundingClientRect().height<44).length);assert.equal(small,0);
