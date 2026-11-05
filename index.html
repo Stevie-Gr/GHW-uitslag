@@ -1019,7 +1019,18 @@ body[data-page="nieuws"] .topbar-title{color:var(--accent-news)}
   letter-spacing:1.4px;
   text-transform:uppercase;
 }
-.wh-links{display:flex;flex-wrap:wrap;gap:4px 22px;margin-top:auto}.wh-links .wh-link{margin-top:0}
+.wh-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto}.wh-links .wh-link{margin-top:0}
+/* glass buttons (Apple-like) */
+.wh-link{display:inline-flex;align-items:center;padding:0 20px;min-height:44px;border-radius:999px;color:#eafff7;
+  background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.07));
+  border:1px solid rgba(255,255,255,.24);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -1px 0 rgba(255,255,255,.06),0 6px 18px rgba(0,0,0,.28);
+  -webkit-backdrop-filter:blur(14px) saturate(170%);backdrop-filter:blur(14px) saturate(170%);
+  letter-spacing:.9px;white-space:nowrap;transition:background .18s,transform .12s,box-shadow .18s}
+.wh-link:hover{background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,.12));box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 8px 22px rgba(0,0,0,.32)}
+.wh-link:active{transform:scale(.97)}
+.wh-kaart>.wh-link,.wh-kaart>.wh-links{margin-top:auto}
+.wh-kaart>*:has(+ .wh-link),.wh-kaart>*:has(+ .wh-links){margin-bottom:18px}
 .wh-link span{display:inline-block;margin-left:6px;transition:transform .15s}
 .wh-link:hover span{transform:translateX(3px)}
 .wh-datum{
