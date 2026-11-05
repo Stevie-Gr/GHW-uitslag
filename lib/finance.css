@@ -47,3 +47,4 @@ div.fs-row{padding:0}.fs-main{flex:1;min-width:0;display:flex;align-items:center
 div.fs-row .fs-chk{margin-right:12px}
 .fs-tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;vertical-align:1px;border:1px solid var(--border)}
 .fs-tag-ok{color:var(--g);border-color:var(--g)}.fs-tag-may{color:var(--gold);border-color:var(--gold)}.fs-tag-no{color:var(--muted)}
+.fs-inleg{margin-top:10px;border-top:1px solid var(--border)}.fs-inleg div{display:flex;flex-direction:column;gap:2px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}.fs-inleg div:last-child{border-bottom:0;padding-bottom:0}.fs-inleg b{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}.fs-inleg span{color:var(--text,inherit)}
