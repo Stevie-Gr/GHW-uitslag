@@ -40,7 +40,7 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   await page.evaluate(()=>{isAdmin=true;currentAdmin={id:'t',naam:'Test',rol:'hoofd'};updateAdminUi();});
   await open();await page.locator('#serie-detail').getByRole('button',{name:'Financiën'}).click();await page.locator('.fs').waitFor();
   let t=nl(await page.locator('.fs').innerText());
-  t=t.toLowerCase();assert(t.includes('opbrengst'));assert(t.includes('seriepot'));assert(t.includes('losse pot'));assert(t.includes('wedstrijd 3 van 3'));assert(t.includes('serievissers'));assert(!t.includes('maximaal'));/* prizes are folded away */
+  t=t.toLowerCase();assert(t.includes('serie-inleg'));assert(t.includes('losse inleg'));assert(t.includes('seriepot'));assert(t.includes('wedstrijd 3 van 3'));assert(t.includes('serievissers'));assert(!t.includes('maximaal'));/* prizes are folded away */
   assert.equal(await page.locator('.fs-row').count(),0);/* nobody chose serie yet: everybody is under Losse deelname */
   await page.locator('.fs-fold',{hasText:'Losse deelname'}).click();
   assert.equal(await page.locator('.fs-row').count(),5);
@@ -52,7 +52,7 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   await page.locator('.fs-pay').click();
   t=nl(await page.locator('.fs').innerText());
   assert(/serievissers/i.test(t));
-  assert(nl(await page.locator('.fs-stats .fs-stat').nth(2).innerText()).includes('€ 50,50'));/* 40,00 club + 10,50 serie */
+  assert(/seriepot\s*€ 50,50/i.test(nl(await page.locator('.fs-sum').innerText())));/* 40,00 club + 10,50 serie */
   assert(nl(await row('Jan Vries').innerText()).toLowerCase().includes('betaald'));
   assert(nl(await row('Jan Vries').innerText()).includes('★'));/* paid and 2 of 2 matches fished */
   await prizes();assert(nl(await page.locator('.fs-prizes').innerText()).toLowerCase().includes('zeker · 1'));
@@ -64,10 +64,9 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   await tap('Arie Kok');await page.locator('.fs-seg .btn',{hasText:'Los'}).click();
   assert.equal(await page.locator('.fs-wk').count(),3);assert.equal(await page.locator('.fs-wk.na').count(),1);/* W3 not fished yet */
   await page.locator('.fs-wk.open').first().click();
-  const stats=page.locator('.fs-stats .fs-stat');
-  const sum=nl(await page.locator('.fs-sum').innerText());assert(sum.includes('losse pot € 3,00'));/* AOW loose tariff */
-  assert(nl(await stats.nth(2).innerText()).includes('€ 50,50'));
-  assert(/opbrengst\s*€ 13,50/i.test(sum));/* 10,50 serie + 3,00 los */
+  const sum=nl(await page.locator('.fs-sum').innerText());assert(/losse inleg\s*€ 3,00/i.test(sum));/* AOW loose tariff */
+  assert(/seriepot\s*€ 50,50/i.test(sum));
+  assert(/totaal binnen\s*€ 13,50/i.test(sum));/* 10,50 serie + 3,00 los */
   assert(nl(await page.locator('.fs-sheet').innerText()).includes('Eindprijs'));
   // Piet: serie but not paid → stays in Serie-vissers without star.
   await tap('Piet Bos');await page.locator('.fs-seg .btn',{hasText:'Serie'}).first().click();
