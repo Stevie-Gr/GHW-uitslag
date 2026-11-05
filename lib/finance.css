@@ -40,3 +40,10 @@
 .fs-seg.three{grid-template-columns:repeat(3,minmax(0,1fr))}.fs-seg.three .btn{padding:8px 4px;font-size:12px;min-height:48px}
 .fs-views{margin:0 0 12px}
 .fs-chk{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:92px;min-height:36px;padding:0 10px;border:1px solid var(--border);border-radius:999px;font-size:13px;color:var(--muted)}.fs-chk.on{border-color:var(--g);background:rgba(119,210,181,.14);color:var(--g);font-weight:700}
+/* simplified overview: summary, fold buttons, one row per fisher */
+.fs-sum{padding:12px!important}.fs-sum-h{margin:0 0 8px;font-size:16px;font-weight:700}.fs-stats-in{padding:0!important;grid-template-columns:repeat(3,minmax(0,1fr))}.fs-sum-f{margin:8px 0 0}
+.fs-fold{width:100%;min-height:44px;margin:0 0 12px;justify-content:center}
+div.fs-row{padding:0}.fs-main{flex:1;min-width:0;display:flex;align-items:center;gap:8px;min-height:60px;padding:8px 12px;background:transparent;border:0;color:inherit;text-align:left;font:inherit;cursor:pointer}
+div.fs-row .fs-chk{margin-right:12px}
+.fs-tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;vertical-align:1px;border:1px solid var(--border)}
+.fs-tag-ok{color:var(--g);border-color:var(--g)}.fs-tag-may{color:var(--gold);border-color:var(--gold)}.fs-tag-no{color:var(--muted)}
