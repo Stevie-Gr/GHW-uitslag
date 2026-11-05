@@ -31,9 +31,11 @@ Per post zie je Inleg · Begroot · Prijzenpot · Uitbetaald · Verschil en kun 
 
 - **Seriepot** = bijdrage vereniging + betaalde serietarieven (normaal en AOW). Daar komen de eindprijzen uit. Losse inleg zit hier niet in.
 - **Losse-inleg pot** = losse inleg die je per visser per wedstrijd hebt afgevinkt (normaal en AOW apart). Dit is een aparte pot; je vult zelf in wat je eruit uitbetaalt (standaard gelijk aan de pot, dus neutraal voor het jaarresultaat).
-- **Losse inleg is standaard open** en telt pas mee als je *Betaald* aanvinkt (in het tabblad Financiën bij de serie, of in het inschrijfgeld-paneel bij de invoer). Bij bestaande series is wat voorheen als betaald gold eenmalig als betaald overgenomen.
+- **Losse inleg is standaard open** en telt pas mee als je het per visser per wedstrijd afvinkt, alleen in het tabblad Financiën bij de serie.
 - **Eindprijs**: een visser komt in aanmerking als hij *Serie* heeft gekozen, *Serie betaald* is aangevinkt en minimaal *beste X* wedstrijden van de serie heeft gevist. Wie niet in aanmerking komt blijft in de stand staan; de prijzen gaan op volgorde naar de gerechtigden.
-- **Tabblad Financiën bij de serie** (alleen zichtbaar voor beheerders met toegang tot financiën): totale opbrengst, beide potten, tellers per groep (✓ serie betaald, ! serie open, – los, ? kies nog) en per visser de keuze, betaling en eindprijs-status. De stand voor bezoekers verandert niet.
+- **Tabblad Financiën bij de serie**: zichtbaar voor alle ingelogde beheerders. Toont totale opbrengst, beide potten, tellers per groep (✓ serie betaald, ! serie open, – los, ? kies nog) en per visser de keuze, betaling en eindprijs-status. Onderaan pas je de tarieven van de serie aan. De stand voor bezoekers verandert niet.
+- **Opslag**: deze gegevens staan niet in de gedeelde uitslagen, maar in drie afgeschermde online tabellen (`serie_tarief`, `serie_deelname`, `serie_los_betaald`) die alleen ingelogde beheerders kunnen lezen en wijzigen. Zonder verbinding kun je niets afvinken. Oude lokale betaalgegevens worden voor de serie genegeerd (schone start).
+- **Admin-pagina Financiën is verborgen** (constante `ADMIN_FINANCE_VISIBLE` in `lib/finance.js`); de code staat er nog.
 
 ## Series
 

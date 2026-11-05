@@ -4201,7 +4201,7 @@ function showSerieDetail(serieId, tab='uitslagen', addToHistory=true){
 }
 
 function renderSerieTab(serieId, tab, addToHistory=true){
-  if(tab==='financien'&&!(window.Finance&&Finance.allowed()))tab='uitslagen';
+  if(tab==='financien'&&!(window.Finance&&Finance.serieAllowed()))tab='uitslagen';
   const d=getData();
   const s=d.competities.find(c=>c.id===serieId);
   if(!s)return;
@@ -4222,7 +4222,7 @@ function renderSerieTab(serieId, tab, addToHistory=true){
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">
       <button class="btn ${tab==='uitslagen'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','uitslagen')" style="flex:1 1 140px;padding:12px 18px;min-height:44px;font-size:14px">Uitslagen</button>
       <button class="btn ${tab==='punten'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','punten')" style="flex:1 1 140px;padding:12px 18px;min-height:44px;font-size:14px">Puntenstand</button>
-      ${(window.Finance&&Finance.allowed())?`<button class="btn ${tab==='financien'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','financien')" style="flex:1 1 140px;padding:12px 18px;min-height:44px;font-size:14px">Financiën</button>`:''}
+      ${(window.Finance&&Finance.serieAllowed())?`<button class="btn ${tab==='financien'?'btn-g':'btn-gh'}" onclick="renderSerieTab('${serieId}','financien')" style="flex:1 1 140px;padding:12px 18px;min-height:44px;font-size:14px">Financiën</button>`:''}
     </div>`;
 
   let content='';
