@@ -41,6 +41,8 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   await open();await page.locator('#serie-detail').getByRole('button',{name:'Financiën'}).click();await page.locator('.fs').waitFor();
   let t=nl(await page.locator('.fs').innerText());
   t=t.toLowerCase();assert(t.includes('opbrengst'));assert(t.includes('seriepot'));assert(t.includes('losse pot'));assert(t.includes('wedstrijd 3 van 3'));assert(t.includes('serievissers'));assert(!t.includes('maximaal'));/* prizes are folded away */
+  assert.equal(await page.locator('.fs-row').count(),0);/* nobody chose serie yet: everybody is under Losse deelname */
+  await page.locator('.fs-fold',{hasText:'Losse deelname'}).click();
   assert.equal(await page.locator('.fs-row').count(),5);
   // Nobody has chosen yet, all 5 can still reach "beste 2": they are all in "Nog te winnen".
   assert.equal(await page.locator('.fs-tag-may').count(),5);
