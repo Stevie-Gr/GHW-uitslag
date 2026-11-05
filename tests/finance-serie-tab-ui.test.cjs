@@ -20,8 +20,8 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
    d.uitslagen=rows.flatMap(([w,ids])=>ids.map((v,i)=>({id:w+v,wedstrijdId:w,visserId:v,gewicht:5000-i*500,afwezig:false})));
    FinanceCore.sync(d);saveData(d);
    // In-memory stand-in for the online tables (the real ones are protected by RLS).
-   window.__db={serie_tarief:[{serie_id:'s1',club:4000,fee:1050,fee_aow:900,loose_fee:350,loose_fee_aow:300,loose_payout:null}],serie_deelname:[],serie_los_betaald:[]};window.__fail=false;window.__calls=0;
-   const key={serie_tarief:['serie_id'],serie_deelname:['serie_id','visser_id'],serie_los_betaald:['serie_id','wedstrijd_id','visser_id']};
+   window.__db={serie_tarief:[{serie_id:'s1',club:4000,fee:1050,fee_aow:900,loose_fee:350,loose_fee_aow:300,loose_payout:null}],serie_deelname:[],serie_los_betaald:[],serie_opgave:[]};window.__fail=false;window.__calls=0;
+   const key={serie_tarief:['serie_id'],serie_deelname:['serie_id','visser_id'],serie_los_betaald:['serie_id','wedstrijd_id','visser_id'],serie_opgave:['serie_id','visser_id']};
    window.__rt=[];
    cloudClient={auth:{onAuthStateChange(){}},channel(){const c={on(_e,_f,cb){window.__rt.push(cb);return c;},subscribe(){return c;}};return c;},removeChannel(){window.__rtGone=true;},from(t){
     const rows=()=>window.__db[t],ok=()=>window.__fail?{error:{message:'nep-fout'}}:{error:null};
@@ -70,6 +70,17 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   // Piet: serie but not paid → stays in Serie-vissers without star.
   await row('Piet Bos').click();await page.locator('.fs-seg .btn',{hasText:'Serie'}).first().click();
   assert(nl(await row('Piet Bos').innerText()).includes('Open'));assert(!nl(await row('Piet Bos').innerText()).includes('★'));
+  // Next match: sign-ups. Dirk fished 1 of 2, signs up for match 3 → projected 2/2.
+  await page.locator('.fs-views .btn',{hasText:'Volgende wedstrijd'}).click();
+  t=nl(await page.locator('.fs').innerText()).toLowerCase();assert(t.includes('3 van 3'));assert(t.includes('opgegeven'));
+  await row('Dirk Jansen').click();
+  assert.equal(await page.evaluate(()=>window.__db.serie_opgave.length),1);
+  assert(nl(await row('Dirk Jansen').innerText()).includes('→ 2/2'));assert(nl(await row('Dirk Jansen').innerText()).toLowerCase().includes('haalt het'));
+  await row('Dirk Jansen').click();assert.equal(await page.evaluate(()=>window.__db.serie_opgave.length),0);/* toggles off again */
+  await row('Dirk Jansen').click();
+  await page.locator('.fs-views .btn',{hasText:'Overzicht'}).click();
+  await page.locator('.fs-prizes .btn',{hasText:'Verwacht'}).click();
+  assert(nl(await page.locator('.fs-prizes').innerText()).toLowerCase().includes('verwacht · 1'));/* only Jan is paid; Dirk is signed up but has not paid */
   // Phone layout: nothing wider than the screen, tap targets at least 44px high.
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
   const small=await page.evaluate(()=>[...document.querySelectorAll('.fs-row,.fs-seg .btn,.fs-pay,.fs-wk')].filter(e=>e.offsetParent&&e.getBoundingClientRect().height<44).length);assert.equal(small,0);
@@ -97,7 +108,7 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   await page.evaluate(()=>{window.__db.serie_deelname=window.__db.serie_deelname.filter(r=>r.visser_id!=='f').concat({serie_id:'s1',visser_id:'f',keuze:'series',betaald:true});window.__rt.forEach(f=>f({}));});
   await page.waitForTimeout(700);
   assert.equal((await row('Wim Smit').locator('.fs-sym').innerText()).trim(),'✓');
-  assert(await page.evaluate(()=>window.__rt.length)===3);/* one listener per table */
+  assert(await page.evaluate(()=>window.__rt.length)===4);/* one listener per table */
   // Admin Financiën page is hidden.
   await page.evaluate(()=>nav('admin-home'));
   const adminText=nl(await page.locator('body').innerText());assert(!/Begroting|Jaaragenda/.test(adminText));

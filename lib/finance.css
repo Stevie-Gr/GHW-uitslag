@@ -36,3 +36,7 @@
 .fs-bh-serie{border-left-color:var(--g)}.fs-bh-kans{border-left-color:var(--gold)}.fs-bh-los{border-left-color:var(--muted)}
 @media (min-width:700px){.fs-stat b{font-size:20px}.fs-lad-col li{font-size:15px}}
 @media (max-width:420px){.fs-stat b{font-size:15px}.fs-lad{gap:0 12px}}
+/* three-way prize switch, views switch, sign-up chip */
+.fs-seg.three{grid-template-columns:repeat(3,minmax(0,1fr))}.fs-seg.three .btn{padding:8px 4px;font-size:12px;min-height:48px}
+.fs-views{margin:0 0 12px}
+.fs-chk{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:92px;min-height:36px;padding:0 10px;border:1px solid var(--border);border-radius:999px;font-size:13px;color:var(--muted)}.fs-chk.on{border-color:var(--g);background:rgba(119,210,181,.14);color:var(--g);font-weight:700}
