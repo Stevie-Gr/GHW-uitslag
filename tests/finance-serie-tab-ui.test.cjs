@@ -57,7 +57,7 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   assert(nl(await page.locator('.fs-prizes').innerText()).toUpperCase().includes('NOG OVER'));
   // Prize ladder: the maximum counts everybody who can still reach it.
   await page.locator('.fs-prizes .btn',{hasText:'Maximaal'}).click();
-  assert(nl(await page.locator('.fs-prizes').innerText()).toLowerCase().includes('maximaal · 5'));
+  assert(nl(await page.locator('.fs-prizes').innerText()).toLowerCase().includes('maximaal · 1'));/* only serie-inschrijvingen count */
   // Arie (AOW): los, tick W1 → loose pot only, prize pot unchanged.
   await tap('Arie Kok');await page.locator('.fs-seg .btn',{hasText:'Los'}).click();
   assert.equal(await page.locator('.fs-wk').count(),3);assert.equal(await page.locator('.fs-wk.na').count(),1);/* W3 not fished yet */
