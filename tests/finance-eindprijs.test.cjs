@@ -46,4 +46,24 @@ C.sync(d);assert.equal(C.loosePaid(w('w1'),{id:'c'}),true);assert.equal(C.looseP
 C.sync(d);assert.equal(C.loosePaid(w('w2'),{id:'c'}),false);/* runs only once */
 // Fishers who never fished are listed too, from the competition.
 assert.ok(C.seriesOverview(d,p).rows.some(r=>r.vid==='g'));
+// Groups and prize ladder.
+assert.deepEqual(C.ladder(29900,10).prizes,[5000,4500,4000,3500,3000,2500,2000,2000,1750,1500]);/* pot 299,00 for 10 paid fishers */
+assert.equal(C.ladder(29900,10).over,150);assert.equal(C.ladder(29900,10).total,29750);
+assert.deepEqual(C.ladder(29900,0).prizes,[]);assert.equal(C.ladder(29900,0).over,29900);
+assert.equal(C.ladder(1000,5).short,true);/* too little money for 5 prizes */
+assert.equal(C.ladder(5000,1).prizes[0],5000);
+const lad=C.ladder(20000,6);assert(lad.prizes.every((x,i,a)=>!i||x<=a[i-1]));assert.equal(lad.total+lad.over,20000);
+assert(lad.prizes.every(x=>x%250===0));
+o=C.seriesOverview(d,p);
+const g=v=>o.rows.find(r=>r.vid===v);
+assert.equal(g('a').group,'serie');assert.equal(g('b').group,'serie');assert.equal(g('f').group,'serie');
+assert.equal(g('c').group,'kans');/* loose now, but 2 of 3 matches fished: can still reach 2 */
+assert.equal(o.groups.serie+o.groups.kans+o.groups.los,o.rows.length);
+assert.equal(o.prizes.sureN,1);/* only a: paid and enough matches */
+assert(o.prizes.maxN>=o.prizes.sureN);assert(o.prizes.potMax>=o.prizes.potSure);
+assert.equal(o.prizes.potSure,6100);
+d.competities[0].telBeste=3;o=C.seriesOverview(d,p);
+assert.equal(g('f').group,'serie');assert.equal(o.rows.find(r=>r.vid==='f').reach,false);/* paid but can no longer reach 3 */
+assert.equal(o.prizes.sureN,0);
+d.competities[0].telBeste=2;
 console.log('PASS: eindprijs reasons (ja/los/onbetaald/geen keuze/nog open/te weinig), prize pot vs loose pot, explicit loose ticks, neutral loose payout in the year result, one-time migration');

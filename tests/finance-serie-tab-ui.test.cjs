@@ -39,34 +39,39 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   await page.evaluate(()=>{isAdmin=true;currentAdmin={id:'t',naam:'Test',rol:'hoofd'};updateAdminUi();});
   await open();await page.locator('#serie-detail').getByRole('button',{name:'Financiën'}).click();await page.locator('.fs').waitFor();
   let t=nl(await page.locator('.fs').innerText());
-  assert(t.includes('Alleen zichtbaar voor ingelogde beheerders'));assert(t.includes('Totale opbrengst van de serie'));assert(t.includes('Seriepot'));assert(t.includes('Losse-inleg pot'));
-  assert.equal(await page.locator('.fs-row').count(),5);assert(t.includes('Kies serie of los'));
-  assert((await page.locator('.fs-tile.sel').count())===0);
-  // Jan: serie, paid.
+  t=t.toLowerCase();assert(t.includes('opbrengst'));assert(t.includes('seriepot'));assert(t.includes('losse pot'));assert(t.includes('zeker · 0'));assert(t.includes('maximaal'));
+  assert.equal(await page.locator('.fs-row').count(),5);
+  // Nobody has chosen yet, all 5 can still reach "beste 2": they are all in "Nog te winnen".
+  assert.equal(await page.locator('.fs-bh').count(),1);assert(nl(await page.locator('.fs-bh').first().innerText()).startsWith('NOG TE WINNEN')||/nog te winnen/i.test(nl(await page.locator('.fs-bh').first().innerText())));
   const row=n=>page.locator('.fs-row').filter({hasText:n});
+  // Jan: serie, paid → moves to Serie-vissers and gets a prize place.
   await row('Jan Vries').click();await page.locator('.fs-seg .btn',{hasText:'Serie'}).first().click();
   await page.locator('.fs-pay').click();
   t=nl(await page.locator('.fs').innerText());
-  assert(t.includes('Seriepot · naar de eindprijzen'));assert(nl(await page.locator('.fs-pots .card').first().innerText()).includes('€ 50,50'));/* 40,00 club + 10,50 serie */
-  assert(nl(await row('Jan Vries').innerText()).includes('Serie betaald'));
-  assert(nl(await row('Jan Vries').innerText()).includes('★ eindprijs 1'));/* chosen, paid and 2 of 2 matches fished */
+  assert(/serie-vissers/i.test(t));
+  assert(nl(await page.locator('.fs-stats .fs-stat').nth(1).innerText()).includes('€ 50,50'));/* 40,00 club + 10,50 serie */
+  assert(nl(await row('Jan Vries').innerText()).toLowerCase().includes('betaald'));
+  assert(nl(await row('Jan Vries').innerText()).includes('★'));/* paid and 2 of 2 matches fished */
+  assert(nl(await page.locator('.fs-prizes').innerText()).toLowerCase().includes('zeker · 1'));
+  assert(nl(await page.locator('.fs-prizes').innerText()).toUpperCase().includes('NOG OVER'));
+  // Prize ladder: the maximum counts everybody who can still reach it.
+  await page.locator('.fs-prizes .btn',{hasText:'Maximaal'}).click();
+  assert(nl(await page.locator('.fs-prizes').innerText()).toLowerCase().includes('maximaal · 5'));
   // Arie (AOW): los, tick W1 → loose pot only, prize pot unchanged.
   await row('Arie Kok').click();await page.locator('.fs-seg .btn',{hasText:'Los'}).click();
   assert.equal(await page.locator('.fs-wk').count(),3);assert.equal(await page.locator('.fs-wk.na').count(),1);/* W3 not fished yet */
   await page.locator('.fs-wk.open').first().click();
-  const pots=page.locator('.fs-pots .card');
-  assert(nl(await pots.nth(1).innerText()).includes('€ 3,00'));/* AOW loose tariff */
-  assert(nl(await pots.first().innerText()).includes('€ 50,50'));
-  assert(nl(await page.locator('.fs-total').innerText()).includes('€ 13,50'));/* 10,50 serie + 3,00 los */
-  assert(nl(await page.locator('.fs-sheet').innerText()).includes('Geen eindprijs: doet los mee'));
-  // Piet: serie but not paid → no prize. Filter on open.
+  const stats=page.locator('.fs-stats .fs-stat');
+  assert(nl(await stats.nth(2).innerText()).includes('€ 3,00'));/* AOW loose tariff */
+  assert(nl(await stats.nth(1).innerText()).includes('€ 50,50'));
+  assert(nl(await stats.first().innerText()).includes('€ 13,50'));/* 10,50 serie + 3,00 los */
+  assert(nl(await page.locator('.fs-sheet').innerText()).includes('Eindprijs'));
+  // Piet: serie but not paid → stays in Serie-vissers without star.
   await row('Piet Bos').click();await page.locator('.fs-seg .btn',{hasText:'Serie'}).first().click();
-  assert((await page.locator('.fs-sheet').innerText()).includes('serie nog niet betaald'));
-  await page.locator('.fs-tile',{hasText:'Serie open'}).click();assert.equal(await page.locator('.fs-row').count(),1);
-  await page.locator('.fs-tile',{hasText:'Serie open'}).click();assert.equal(await page.locator('.fs-row').count(),5);
+  assert(nl(await row('Piet Bos').innerText()).includes('Open'));assert(!nl(await row('Piet Bos').innerText()).includes('★'));
   // Phone layout: nothing wider than the screen, tap targets at least 44px high.
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
-  const small=await page.evaluate(()=>[...document.querySelectorAll('.fs-row,.fs-tile,.fs-seg .btn,.fs-pay,.fs-wk')].filter(e=>e.offsetParent&&e.getBoundingClientRect().height<44).length);assert.equal(small,0);
+  const small=await page.evaluate(()=>[...document.querySelectorAll('.fs-row,.fs-seg .btn,.fs-pay,.fs-wk')].filter(e=>e.offsetParent&&e.getBoundingClientRect().height<44).length);assert.equal(small,0);
   await page.locator('.fs').screenshot({path:path.join(out,'serie-financien-360.png')});
   // The stand stays plain for admins too.
   await page.evaluate(()=>showSerieDetail('s1','punten'));const standAdmin=nl(await page.locator('#serie-detail').innerText());
@@ -86,7 +91,7 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   await page.locator('.fs-seg .btn',{hasText:'Serie'}).first().click();
   await page.evaluate(()=>{window.__fail=false;});
   await page.waitForTimeout(300);
-  assert((await row('Wim Smit').innerText()).includes('Los'));/* back to the saved state */
+  assert.equal((await row('Wim Smit').locator('.fs-sym').innerText()).trim(),'–');/* back to the saved state: Los */
   // Admin Financiën page is hidden.
   await page.evaluate(()=>nav('admin-home'));
   const adminText=nl(await page.locator('body').innerText());assert(!/Begroting|Jaaragenda/.test(adminText));

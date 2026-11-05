@@ -25,3 +25,14 @@
 .fs-sheet{padding:10px 12px 12px;background:rgba(255,255,255,.03);border-top:1px solid var(--border)}.fs-seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}.fs-seg .btn,.fs-pay,.fs-wk{min-height:48px}.fs-seg .btn.on{border-color:var(--g);background:rgba(119,210,181,.14);color:var(--g)}.fs-pay{width:100%;font-size:15px}.fs-pay.paid,.fs-wk.paid{border-color:var(--g);background:rgba(119,210,181,.14);color:var(--g)}.fs-weeks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.fs-wk{display:flex;justify-content:space-between;align-items:center}.fs-wk.open{border-color:var(--gold);background:rgba(245,200,66,.12);color:var(--gold)}.fs-wk.na{color:var(--muted);opacity:.7}.fs-why{margin-top:10px}
 .fs-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);margin:8px 0}
 @media(max-width:560px){.fs-pots{grid-template-columns:1fr}.fs-big{font-size:26px}}
+/* Series tab: stats, prize ladder and the three blocks */
+.fs{max-width:720px}
+.fs-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px!important}
+.fs-stat{min-width:0}.fs-stat span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}.fs-stat b{display:block;font-size:17px;line-height:1.3;margin-top:2px;white-space:nowrap}.fs-stat small{display:block;font-size:11px;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fs-prizes{padding:12px!important}.fs-prizes .fs-seg{margin-bottom:10px}
+.fs-lad{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}.fs-lad-col{list-style:none;margin:0;padding:0}.fs-lad-col li{display:flex;align-items:center;justify-content:space-between;min-height:34px;border-bottom:1px solid var(--border);font-size:14px}.fs-lad-col li span{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.07);font-size:12px;color:var(--muted)}.fs-lad-col li:first-child span{background:rgba(245,200,66,.18);color:var(--gold)}
+.fs-lad-sum{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;margin:10px 0 0;font-size:12px;color:var(--muted)}.fs-over{color:var(--gold);font-size:14px;letter-spacing:.03em}
+.fs-bh{display:flex;align-items:center;justify-content:space-between;margin:16px 2px 6px;padding-left:10px;border-left:4px solid var(--border)}.fs-bh b{font-size:13px;text-transform:uppercase;letter-spacing:.05em}.fs-hc{font-size:13px;color:var(--muted)}
+.fs-bh-serie{border-left-color:var(--g)}.fs-bh-kans{border-left-color:var(--gold)}.fs-bh-los{border-left-color:var(--muted)}
+@media (min-width:700px){.fs-stat b{font-size:20px}.fs-lad-col li{font-size:15px}}
+@media (max-width:420px){.fs-stat b{font-size:15px}.fs-lad{gap:0 12px}}
