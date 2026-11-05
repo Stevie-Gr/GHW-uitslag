@@ -73,6 +73,9 @@ assert.equal(o2.played,2);assert.equal(o2.toGo,1);assert.equal(o2.next,3);assert
 p.opgave={f:3};o2=C.seriesOverview(d,p);
 assert.equal(o2.rows.find(r=>r.vid==='f').signed,true);assert.equal(o2.rows.find(r=>r.vid==='f').projected,2);
 assert.equal(o2.prizes.sureN,1);assert.equal(o2.prizes.expN,2);/* f: paid, 1 fished + signed for the next one = 2 */
+p.opgave={f:3};const wasPaid=p.seriesPaid.f;delete p.seriesPaid.f;o2=C.seriesOverview(d,p);
+assert.equal(o2.prizes.expN,2);assert.equal(o2.prizes.sureN,1);assert.equal(o2.prizes.potExp,o2.prizes.potSure+o2.rows.find(r=>r.vid==='f').fee);/* signed but unpaid: counts in Verwacht, fee joins the pot */
+if(wasPaid)p.seriesPaid.f=wasPaid;
 p.opgave={f:2};o2=C.seriesOverview(d,p);assert.equal(o2.rows.find(r=>r.vid==='f').signed,false);assert.equal(o2.prizes.expN,1);/* sign-up for an older match is ignored */
 // Series total: "still to go" follows the total, not the number of planned matches.
 p.opgave={};p.totalMatches=4;o2=C.seriesOverview(d,p);assert.equal(o2.matches,4);assert.equal(o2.toGo,2);
