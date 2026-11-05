@@ -67,7 +67,7 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   const stats=page.locator('.fs-stats .fs-stat');
   const sum=nl(await page.locator('.fs-sum').innerText());assert(sum.includes('losse pot € 3,00'));/* AOW loose tariff */
   assert(nl(await stats.nth(2).innerText()).includes('€ 50,50'));
-  assert(sum.includes('Opbrengst € 13,50'));/* 10,50 serie + 3,00 los */
+  assert(/opbrengst\s*€ 13,50/i.test(sum));/* 10,50 serie + 3,00 los */
   assert(nl(await page.locator('.fs-sheet').innerText()).includes('Eindprijs'));
   // Piet: serie but not paid → stays in Serie-vissers without star.
   await tap('Piet Bos');await page.locator('.fs-seg .btn',{hasText:'Serie'}).first().click();
