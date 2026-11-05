@@ -22,7 +22,8 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
    // In-memory stand-in for the online tables (the real ones are protected by RLS).
    window.__db={serie_tarief:[{serie_id:'s1',club:4000,fee:1050,fee_aow:900,loose_fee:350,loose_fee_aow:300,loose_payout:null}],serie_deelname:[],serie_los_betaald:[]};window.__fail=false;window.__calls=0;
    const key={serie_tarief:['serie_id'],serie_deelname:['serie_id','visser_id'],serie_los_betaald:['serie_id','wedstrijd_id','visser_id']};
-   cloudClient={auth:{onAuthStateChange(){}},from(t){
+   window.__rt=[];
+   cloudClient={auth:{onAuthStateChange(){}},channel(){const c={on(_e,_f,cb){window.__rt.push(cb);return c;},subscribe(){return c;}};return c;},removeChannel(){window.__rtGone=true;},from(t){
     const rows=()=>window.__db[t],ok=()=>window.__fail?{error:{message:'nep-fout'}}:{error:null};
     return {
      select(){return {eq:(c,v)=>Promise.resolve({data:rows().filter(r=>r[c]===v),error:null})};},
@@ -92,6 +93,11 @@ const nl=t=>String(t).replace(/\u00a0/g,' ').replace(/\s+/g,' ');
   await page.evaluate(()=>{window.__fail=false;});
   await page.waitForTimeout(300);
   assert.equal((await row('Wim Smit').locator('.fs-sym').innerText()).trim(),'–');/* back to the saved state: Los */
+  // Live: a payment saved by another admin shows up without pressing Verversen.
+  await page.evaluate(()=>{window.__db.serie_deelname=window.__db.serie_deelname.filter(r=>r.visser_id!=='f').concat({serie_id:'s1',visser_id:'f',keuze:'series',betaald:true});window.__rt.forEach(f=>f({}));});
+  await page.waitForTimeout(700);
+  assert.equal((await row('Wim Smit').locator('.fs-sym').innerText()).trim(),'✓');
+  assert(await page.evaluate(()=>window.__rt.length)===3);/* one listener per table */
   // Admin Financiën page is hidden.
   await page.evaluate(()=>nav('admin-home'));
   const adminText=nl(await page.locator('body').innerText());assert(!/Begroting|Jaaragenda/.test(adminText));
