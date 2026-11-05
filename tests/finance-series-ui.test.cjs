@@ -15,10 +15,11 @@ const out=path.join(os.tmpdir(),'hsv-finance-test');fs.mkdirSync(out,{recursive:
  await page.evaluate(()=>{const d=getData();d.vissers=[{id:'full',voornaam:'Serie',achternaam:'Visser'},{id:'loose',voornaam:'Losse',achternaam:'Visser',aow:true}];saveData(d);maakWedstrijdVanRoosterItem(getData().roosterItems.find(r=>r.serieWedstrijdNummer===1).id);const dd=getData();const w=dd.wedstrijden[0];dd.uitslagen=['full','loose'].map(id=>({id:w.id+id,wedstrijdId:w.id,visserId:id,gewicht:1000}));saveData(dd);nav('invoer');openInvoer(w.id);});
  await page.locator('.fin-pay-panel').waitFor();assert.equal(await page.locator('.fin-pay-panel .fin-choose').count(),2);assert.equal(await page.evaluate(()=>Finance.open().filter(i=>i.kind==='choice').length),2);
  await page.locator('.fin-pay-panel select[data-fin-change="series-mode"]').nth(0).selectOption('series');await page.locator('.fin-pay-panel select[data-fin-change="series-mode"]').nth(1).selectOption('loose');
- // Series member is open for the (normal) series fee until confirmed; the loose AOW fisher counts as paid at the AOW loose fee.
- let open=await page.evaluate(()=>Finance.open());assert.deepEqual(open.map(i=>i.kind+':'+i.amount),['series:1050']);
- await page.locator('.fin-pay-panel input[data-fin-change="unpaid"]').check();open=await page.evaluate(()=>Finance.open());assert.deepEqual(open.map(i=>i.kind+':'+i.amount).sort(),['match:300','series:1050']);
- await page.locator('.fin-pay-panel input[data-fin-change="series-paid"]').check();open=await page.evaluate(()=>Finance.open());assert.deepEqual(open.map(i=>i.kind+':'+i.amount),['match:300']);
+ // Series member is open for the (normal) series fee until confirmed; the loose AOW fisher is open at the AOW loose fee until explicitly ticked as paid.
+ let open=await page.evaluate(()=>Finance.open());assert.deepEqual(open.map(i=>i.kind+':'+i.amount).sort(),['match:300','series:1050']);
+ await page.locator('.fin-pay-panel input[data-fin-change="loose-paid"]').check();open=await page.evaluate(()=>Finance.open());assert.deepEqual(open.map(i=>i.kind+':'+i.amount),['series:1050']);
+ await page.locator('.fin-pay-panel input[data-fin-change="series-paid"]').check();open=await page.evaluate(()=>Finance.open());assert.deepEqual(open,[]);
+ await page.locator('.fin-pay-panel input[data-fin-change="loose-paid"]').uncheck();open=await page.evaluate(()=>Finance.open());assert.deepEqual(open.map(i=>i.kind+':'+i.amount),['match:300']);
  // Series detail lists members with their choice; the open card settles the loose fee.
  await page.locator('#nav-finance').click();await page.locator('.fin-row').click();assert.equal(await page.locator('.fin-payment-list .fin-payment').count(),2);assert((await page.locator('.fin-payment-list').textContent()).includes('serie betaald'));
  await click('back');await click('settle-open');assert.equal(await page.evaluate(()=>Finance.open().length),0);

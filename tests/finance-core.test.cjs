@@ -14,18 +14,19 @@ const p=d.finance.entries.find(e=>e.kind==='series');assert.equal(p.title,'Winte
 assert.deepEqual([...new Set(p.members)].sort(),['a','b','c']);assert.equal(C.open(d,2026).filter(i=>i.kind==='choice').length,3);// one choice per fisher per series
 C.setSeriesMode(d,p.id,'a','series');C.setSeriesMode(d,p.id,'c','series');C.setSeriesMode(d,p.id,'b','loose');
 o=C.open(d,2026);assert.equal(o.filter(i=>i.kind==='choice').length,0);const ser=o.filter(i=>i.kind==='series');assert.deepEqual(ser.map(i=>i.unit.id+':'+i.amount).sort(),['a:1050','c:900']);
-const w2=d.finance.entries.find(e=>e.matchId==='w2');assert.equal(C.amount(d,w2,{id:'b',members:['b']}),350);assert.equal(C.amount(d,w2,{id:'a',members:['a']}),0);assert.equal(o.filter(i=>i.kind==='match').length,1);// still the couple
-C.setUnpaid(w2,'b',true);assert.equal(C.open(d,2026).filter(i=>i.entryId===w2.id)[0].amount,350);C.setSeriesPaid(d,p.id,'a',true);assert.deepEqual(C.open(d,2026).filter(i=>i.kind==='series').map(i=>i.unit.id),['c']);
+const w2=d.finance.entries.find(e=>e.matchId==='w2');assert.equal(C.amount(d,w2,{id:'b',members:['b']}),350);assert.equal(C.amount(d,w2,{id:'a',members:['a']}),0);assert.equal(o.filter(i=>i.kind==='match').length,2);// the couple plus b's loose fee on w2: open until explicitly ticked
+assert.equal(C.open(d,2026).filter(i=>i.entryId===w2.id)[0].amount,350);C.setSeriesPaid(d,p.id,'a',true);assert.deepEqual(C.open(d,2026).filter(i=>i.kind==='series').map(i=>i.unit.id),['c']);
 // Loose → series later: full series fee, no crediting.
 C.setSeriesMode(d,p.id,'b','series');assert.equal(C.open(d,2026).filter(i=>i.kind==='series'&&i.unit.id==='b')[0].amount,1050);assert.equal(C.open(d,2026).filter(i=>i.entryId===w2.id).length,0);
 // Loose fees are extra income: b fished w2 loose (350) before switching; put him back to loose for the check.
-C.setSeriesMode(d,p.id,'b','loose');C.setUnpaid(w2,'b',false);assert.deepEqual(C.looseIncome(d,p).map(r=>r.vid+':'+r.count+':'+r.total),['b:1:350']);C.setUnpaid(w2,'b',true);assert.equal(C.looseIncome(d,p).length,0);C.setUnpaid(w2,'b',false);
+C.setSeriesMode(d,p.id,'b','loose');assert.equal(C.looseIncome(d,p).length,0);C.setLoosePaid(w2,'b',true);assert.deepEqual(C.looseIncome(d,p).map(r=>r.vid+':'+r.count+':'+r.total),['b:1:350']);
 d.finance.years[2026].extras=[{title:'Extra bijdrage vereniging',amount:50000}];
 // Summary: spent defaults to the prize fund (fees + planned), so 'over' = budget + extras - planned while nothing deviates; an override changes it.
-let s=C.summary(d,2026);assert.equal(s.planned,3000+25000+4000);assert.equal(s.inleg,C.inleg(d,k)+C.inleg(d,p));assert.equal(C.inleg(d,k),1000);/* couple K unpaid, lone e paid */assert.equal(C.inleg(d,p),1050+350);/* a confirmed series, b loose */assert.equal(s.spent,s.planned+s.inleg);assert.equal(s.extras,50000);assert.equal(s.start,243500+50000);assert.equal(s.over,s.start-s.planned);assert.equal(s.openCount,2);
-k.actual=4500;s=C.summary(d,2026);assert.equal(s.spent,4500+25000+C.pot(d,p));assert.equal(s.over,s.start+s.inleg-s.spent);assert.equal(C.pot(d,k),4000);
+let s=C.summary(d,2026);assert.equal(s.planned,3000+25000+4000);assert.equal(s.inleg,C.inleg(d,k)+C.inleg(d,p));assert.equal(C.inleg(d,k),1000);/* couple K unpaid, lone e paid */assert.equal(C.inleg(d,p),1050);/* only the confirmed series fee */assert.equal(s.loose,350);/* b's loose fee is a separate pot */assert.equal(s.spent,s.planned+s.inleg+s.loose);assert.equal(s.extras,50000);assert.equal(s.start,243500+50000);assert.equal(s.over,s.start-s.planned);assert.equal(s.openCount,2);
+k.actual=4500;s=C.summary(d,2026);assert.equal(s.spent,4500+25000+C.pot(d,p)+C.loosePot(d,p));assert.equal(s.over,s.start+s.inleg+s.loose-s.spent);assert.equal(C.pot(d,k),4000);
+assert.equal(C.pot(d,p),4000+1050);/* club contribution + paid series fees, no loose fees */p.looseActual=100;s=C.summary(d,2026);assert.equal(s.over,s.start+s.inleg+s.loose-s.spent);p.looseActual=null;
 C.setSeriesMode(d,p.id,'b','series');s=C.summary(d,2026);assert.equal(C.inleg(d,p),1050);assert.equal(s.openCount,3);
 C.cancel(k);s=C.summary(d,2026);assert.equal(s.planned,29000);assert.equal(s.openCount,2);
 // Money and dates.
 assert.equal(C.cents('€ 3,50'),350);assert.equal(C.cents(10.5),1050);assert.throws(()=>C.cents('abc'));assert.equal(C.date('5-4-2026'),'2026-04-05');
-console.log('PASS: fresh start wipe, paid-by-default, couple units, lone fisher full fee, series choice/confirm, AOW tariffs, loose→series full fee, summary planned/actual/over');
+console.log('PASS: fresh start wipe, paid-by-default (matches), explicit loose payments and separate loose pot in series, couple units, lone fisher full fee, series choice/confirm, AOW tariffs, loose→series full fee, summary planned/actual/over');
