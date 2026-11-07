@@ -2311,7 +2311,7 @@ body.mobile-nav-open .sidebar-overlay{
   <div class="share-modal" onclick="event.stopPropagation()">
     <div class="share-actions">
       <button class="btn btn-g" type="button" onclick="downloadUitslagImage()">Download PNG</button>
-      <button class="btn btn-gh" type="button" onclick="downloadExcelExport()">Download Excel</button>
+      <button class="btn btn-gh" type="button" id="share-excel-btn" onclick="downloadExcelExport()">Download Excel</button>
       <button class="btn btn-gh" type="button" onclick="closeUitslagImagePreview()">Sluiten</button>
     </div>
     <div class="share-preview-wrap">
@@ -2337,7 +2337,7 @@ let datePickerState = {targetId:null, month:new Date().getMonth(), year:new Date
 let puntenSerieId = null;
 let currentScreen = {kind:'page', page:'welcome'};
 let screenHistory = [{kind:'page', page:'welcome'}];
-let sharePreviewState = { mode:null, wedstrijdId:null, gescheidenGroepId:null };
+let sharePreviewState = { mode:null, wedstrijdId:null, gescheidenGroepId:null, serieId:null };
 let beheerRoosterEditId = null;
 let kanjerDetailVisserId = null;
 let beheerWedstrijdEditId = null;
@@ -4345,6 +4345,9 @@ function renderSerieTab(serieId, tab, addToHistory=true){
       }).join('');
 
       content=`
+        <div style="display:flex;justify-content:flex-end;margin:0 0 10px">
+          <button class="btn btn-g btn-sm" type="button" onclick="openSerieStandImagePreview('${serieId}')">Deel als afbeelding</button>
+        </div>
         <div class="info" style="margin-bottom:12px">
           Beste <strong>${s.telBeste}</strong> van ${gevistenWeds.length} geviste wedstrijden tellen.
           Laagste punten wint · bij gelijkstand: meeste gewicht wint.
@@ -5855,6 +5858,209 @@ function openUitslagImagePreview(wedstrijdId){
 
 function closeUitslagImagePreview(){
   document.getElementById('share-modal')?.classList.remove('open');
+  const excelBtn=document.getElementById('share-excel-btn');
+  if(excelBtn) excelBtn.style.display='';
+}
+
+// ── Serie-stand (Tussenstand/Eindstand) als afbeelding ───────────────────────
+function getSerieStandShareModel(serieId, d){
+  const serie=d.competities.find(c=>c.id===serieId);
+  if(!serie) return null;
+  const weds=d.wedstrijden.filter(w=>w.competitieId===serieId);
+  const gevist=weds.filter(w=>d.uitslagen.some(u=>u.wedstrijdId===w.id&&!u.afwezig));
+  const laatste=[...gevist].sort((a,b)=>String(b.datum).localeCompare(String(a.datum)))[0];
+  const stand=berekenSerieStand(serieId,d).map((v,i)=>({
+    place:i+1,
+    naam:v.naam,
+    punten:v.totaal,
+    gewicht:v.besteGewicht||0,
+    deelnames:v.deelnames||0
+  }));
+  const statusTitel=serieStandNaam(serieId,d);
+  const totaalWeds=Math.max(weds.length,gevist.length);
+  return {
+    title:`${statusTitel} ${serie.naam}`,
+    logoSrc:getShareLogoSrc(),
+    gevist:gevist.length,
+    metaLines:[
+      `${statusTitel} na ${gevist.length} van ${totaalWeds} wedstrijden${serie.telBeste?` · beste ${serie.telBeste} tellen`:''}`,
+      laatste?.datum?`Laatste uitslag ${nlDatum(laatste.datum)}`:''
+    ].filter(Boolean),
+    stand
+  };
+}
+
+function buildSerieStandImageMarkup(model){
+  const logoHtml=model.logoSrc?`<div class="share-logo"><img src="${model.logoSrc}" alt="HSV logo"></div>`:'';
+  const rowsHtml=model.stand.map(row=>`
+    <tr>
+      <td style="width:60px"><div class="share-rank ${row.place===1?'r1':row.place===2?'r2':row.place===3?'r3':''}">${row.place}</div></td>
+      <td><strong>${escapeHtml(row.naam)}</strong></td>
+      <td class="share-num" style="width:90px;color:#f4f0e8">${row.punten}</td>
+      <td class="share-muted" style="width:110px">${row.deelnames}/${model.gevist}</td>
+      <td class="share-num" style="width:130px">${kg(row.gewicht)} kg</td>
+    </tr>`).join('');
+  return `<div class="share-card" id="share-card" style="width:980px">
+    <div class="share-head">
+      ${logoHtml}
+      <div class="share-title">
+        <div class="share-kicker">Hengelsportvereniging Groot Hoeksche Waard</div>
+        <h2>${escapeHtml(model.title)}</h2>
+        <div class="share-meta">${model.metaLines.map(item=>`<span>${escapeHtml(item)}</span>`).join('')}</div>
+      </div>
+    </div>
+    <section class="share-group">
+      <div class="share-group-head">
+        <strong>Totaal</strong>
+        <span>${model.stand.length} vissers</span>
+      </div>
+      <table class="share-table">
+        <thead><tr>
+          <th style="width:60px">Plek</th>
+          <th>Visser</th>
+          <th style="width:90px">Punten</th>
+          <th style="width:110px">Deelnames</th>
+          <th style="width:130px">Gewicht</th>
+        </tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </section>
+  </div>`;
+}
+
+function openSerieStandImagePreview(serieId){
+  const d=getData();
+  const model=getSerieStandShareModel(serieId,d);
+  if(!model||!model.stand.length){
+    showAppNotice('Er is nog geen stand om te delen.','warn');
+    return;
+  }
+  sharePreviewState={mode:'serie-stand',wedstrijdId:null,gescheidenGroepId:null,serieId};
+  const root=document.getElementById('share-preview-root');
+  if(root) root.innerHTML=buildSerieStandImageMarkup(model);
+  const excelBtn=document.getElementById('share-excel-btn');
+  if(excelBtn) excelBtn.style.display='none';
+  document.getElementById('share-modal')?.classList.add('open');
+}
+
+async function downloadSerieStandImage(){
+  const d=getData();
+  const model=getSerieStandShareModel(sharePreviewState?.serieId,d);
+  if(!model||!model.stand.length) return;
+  const width=1400, padding=48, innerWidth=width-(padding*2), scale=2;
+  const rowGap=12, rowBase=58;
+  const colPunten=innerWidth-520, colDeel=innerWidth-330, colGew=innerWidth-24;
+  const nameX=100, nameMaxWidth=colPunten-nameX-80;
+  const measure=document.createElement('canvas').getContext('2d');
+  measure.font='800 28px Arial';
+  const rows=model.stand.map(row=>{
+    const lines=wrapCanvasText(measure,row.naam,nameMaxWidth).slice(0,2);
+    return {...row,lines,height:Math.max(rowBase,lines.length*32+18)};
+  });
+  measure.font='800 50px Arial';
+  const titleLines=wrapCanvasText(measure,model.title,width-(padding*2)-254);
+  measure.font='500 22px Arial';
+  const metaLines=model.metaLines.flatMap(t=>wrapCanvasText(measure,t,width-(padding*2)-254));
+  const metaOffset=38+titleLines.length*54+16;
+  const headerHeight=Math.max(118,metaOffset+metaLines.length*28)+24;
+  const rowsHeight=rows.reduce((s,r)=>s+r.height+rowGap,0);
+  const height=padding+headerHeight+18+88+40+rowsHeight+padding;
+  try{
+    const canvas=document.createElement('canvas');
+    canvas.width=width*scale;
+    canvas.height=height*scale;
+    const ctx=canvas.getContext('2d');
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality='high';
+    ctx.scale(scale,scale);
+    ctx.textBaseline='top';
+    ctx.fillStyle='#081018';
+    ctx.fillRect(0,0,width,height);
+    roundedRect(ctx,18,18,width-36,height-36,30,'#0b1319','rgba(255,255,255,.08)');
+    let logo=null;
+    try{ logo=await loadImageElement(model.logoSrc); }catch(_e){ logo=null; }
+    let y=padding;
+    const logoW=logo?230:0, logoH=logo?118:0;
+    if(logo){
+      roundedRect(ctx,padding,y,logoW,logoH,22,'#ffffff');
+      const ratio=Math.min((logoW-28)/logo.naturalWidth,(logoH-24)/logo.naturalHeight);
+      const drawW=logo.naturalWidth*ratio, drawH=logo.naturalHeight*ratio;
+      ctx.drawImage(logo,padding+(logoW-drawW)/2,y+(logoH-drawH)/2,drawW,drawH);
+    }
+    const titleX=logo?padding+logoW+24:padding;
+    ctx.fillStyle='#6ec4a8';
+    ctx.font='800 18px Arial';
+    ctx.fillText('Hengelsportvereniging Groot Hoeksche Waard',titleX,y+8);
+    ctx.fillStyle='#f4f0e8';
+    ctx.font='800 50px Arial';
+    titleLines.forEach((line,idx)=>ctx.fillText(line,titleX,y+38+(idx*54)));
+    ctx.fillStyle='#9bb5c6';
+    ctx.font='500 22px Arial';
+    let metaY=y+metaOffset;
+    metaLines.forEach(t=>{ ctx.fillText(t,titleX,metaY); metaY+=28; });
+    y+=headerHeight+18;
+
+    roundedRect(ctx,padding,y,innerWidth,72,20,'rgba(255,255,255,.03)','rgba(255,255,255,.08)');
+    ctx.fillStyle='#f4f0e8';
+    ctx.font='800 30px Arial';
+    ctx.fillText('Totaal',padding+22,y+18);
+    ctx.fillStyle='#9bb5c6';
+    ctx.font='500 20px Arial';
+    const sub=`${model.stand.length} vissers`;
+    ctx.fillText(sub,padding+innerWidth-22-ctx.measureText(sub).width,y+24);
+    y+=88;
+
+    ctx.fillStyle='#9bb5c6';
+    ctx.font='800 18px Arial';
+    const right=(text,x,yy)=>ctx.fillText(text,padding+x-ctx.measureText(text).width,yy);
+    ctx.fillText('PLEK',padding+8,y);
+    ctx.fillText('VISSER',padding+nameX,y);
+    right('PUNTEN',colPunten,y);
+    right('DEELNAMES',colDeel,y);
+    right('GEWICHT',colGew,y);
+    y+=40;
+
+    rows.forEach(row=>{
+      roundedRect(ctx,padding,y,innerWidth,row.height,16,'rgba(255,255,255,.02)','rgba(255,255,255,.06)');
+      const cy=y+row.height/2;
+      const rankColor=row.place===1?'#ffcf49':row.place===2?'#d2dceb':row.place===3?'#df8a32':'#35424d';
+      ctx.fillStyle=rankColor;
+      ctx.beginPath();
+      ctx.arc(padding+30,cy,22,0,Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle=row.place<=3?'#10161b':'#f4f0e8';
+      ctx.font='800 24px Arial';
+      const rt=String(row.place);
+      ctx.fillText(rt,padding+30-(ctx.measureText(rt).width/2),cy-14);
+      ctx.fillStyle='#f4f0e8';
+      ctx.font='800 28px Arial';
+      const top=cy-(row.lines.length*32)/2;
+      row.lines.forEach((line,idx)=>ctx.fillText(line,padding+nameX,top+(idx*32)));
+      ctx.font='800 28px Arial';
+      right(String(row.punten),colPunten,cy-16);
+      ctx.fillStyle='#9bb5c6';
+      ctx.font='500 22px Arial';
+      right(`${row.deelnames}/${model.gevist}`,colDeel,cy-12);
+      ctx.fillStyle='#7de0c0';
+      ctx.font='800 30px Arial';
+      right(`${kg(row.gewicht)} kg`,colGew,cy-17);
+      y+=row.height+rowGap;
+    });
+
+    const pngBlob=await canvasToPngBlob(canvas);
+    const filename=`${getShareSafeName(model.title,'stand')}.png`;
+    if(isMobileView()&&typeof File==='function'&&navigator.canShare&&navigator.share){
+      const file=new File([pngBlob],filename,{type:'image/png'});
+      if(navigator.canShare({files:[file]})){
+        try{ await navigator.share({files:[file],title:model.title}); return; }
+        catch(shareErr){ if(shareErr&&shareErr.name==='AbortError') return; }
+      }
+    }
+    triggerBlobDownload(pngBlob,filename);
+  }catch(e){
+    console.error(e);
+    alert('Kon de standafbeelding niet maken.');
+  }
 }
 
 function getGescheidenKoppelStandPreviewModel(gescheidenGroepId, d){
@@ -6682,6 +6888,10 @@ function buildUitslagImageMarkup(w, d){
 }
 
 async function downloadUitslagImage(){
+  if(sharePreviewState?.mode==='serie-stand'){
+    await downloadSerieStandImage();
+    return;
+  }
   if(sharePreviewState?.mode==='kanjer'){
     await downloadKanjerImage();
     return;
